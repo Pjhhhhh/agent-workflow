@@ -1,0 +1,36 @@
+{
+  "date": "2026-10-05",
+  "scope": "Synthetic CLI protocol, standalone skill package and demo; not model evaluation.",
+  "environment": {
+    "os": "Darwin",
+    "python": "3.9.6",
+    "basis": "Recorded clean-tree subprocess interpreter"
+  },
+  "protocol": {
+    "passed": true,
+    "cases": 119,
+    "script_sha256": "de8769727b2c635e5ebfe2b6ed096f88ae586f642f3ac50895641e5d85174dcb",
+    "replay_sha256": "1d45cdcd321e6d2d8063e5c706db58a56647206785c7726046ed3b25d1adf923"
+  },
+  "demo": {
+    "synthetic": true,
+    "results": [
+      {
+        "case": "self",
+        "status": "provisional",
+        "exit_code": 1,
+        "expected": "provisional",
+        "ok": true
+      },
+      {
+        "case": "changed",
+        "status": "partial",
+        "exit_code": 1,
+        "expected": "partial",
+        "ok": true
+      }
+    ]
+  },
+  "demo_sha256": "9142d76531180cc4f3ed8b715ed389e958a3c95031cd126ece6b1ed00c74b03c",
+  "clean_public_tree": true
+}

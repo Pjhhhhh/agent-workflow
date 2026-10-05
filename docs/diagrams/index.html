@@ -1,0 +1,10 @@
+<!doctype html>
+<!-- @author Pjh：把流程图与问题定位放在一个本地入口，避免图示和实际实现混淆。 -->
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>agent-workflow · 工作流程图集</title><style>
+:root{color-scheme:light dark;font-family:system-ui,sans-serif;background:#f5f7fb;color:#182335}body{max-width:1100px;margin:40px auto;padding:0 24px;line-height:1.7}h1{font-size:32px;margin:0}p{color:#526178}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:18px;margin:24px 0}.card{display:block;padding:22px;border:1px solid #d8e0ec;border-radius:14px;background:white;color:inherit;text-decoration:none}.card:hover,.card:focus-visible{border-color:#008ca8;outline:2px solid #008ca8;outline-offset:3px}.tag{font-size:13px;color:#087a8d}h2{font-size:20px;margin:8px 0}a{color:#087a8d}footer{margin-top:28px;font-size:14px}@media(prefers-color-scheme:dark){:root{background:#131b29;color:#eef3fa}p{color:#b6c2d4}.card{background:#1d293b;border-color:#354761}.tag,a{color:#65d7e9}}
+</style></head><body><header><h1>agent-workflow</h1><p>用图集展示工作流程，定位遗漏、验证盲区与过早停止。点击一张图开始查看。</p></header><main><div class="grid">
+<a class="card" href="01-workflow.html"><span class="tag">全局通用规则</span><h2>01 · 从要求到完成</h2><p>执行、终态验证、按任务复核与必要修复。</p></a>
+<a class="card" href="03-improvement.html"><span class="tag">待实践验证</span><h2>03 · 流程持续改进</h2><p>先复验原问题，再用固定任务检验改进收益。</p></a>
+<a class="card" href="04-stop-boundary.html"><span class="tag">局部实验</span><h2>04 · Stop 覆盖范围</h2><p>显式登记、会话隔离、有限续跑与未完成退出。</p></a>
+<a class="card" href="05-local-evaluation.html"><span class="tag">通用复杂任务验收</span><h2>05 · 主张与操作核查</h2><p>原文绑定、事实来源、操作范围和缺口下一动作。</p></a>
+</div><p>当前四张图展示流程和实现边界。通用规则已配置全局使用；简单任务直接核验，复杂任务通过全局技能采用 v3 独立验收。图集按需使用。Stop 门禁仍是可选实验。项目没有自动业务执行引擎，也未安装全局评分钩子。</p><p><a href="../全局使用范围.md">全局使用范围</a> · <a href="../防编造与范围核查.md">防编造与范围核查</a> · <a href="../问题与失败清单.md">问题与失败清单</a> · <a href="../工作流程.md">工作流程</a> · <a href="../../README.md">项目说明</a></p></main><footer>本地实验 · MIT · 图源可编辑</footer></body></html>

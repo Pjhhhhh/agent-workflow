@@ -1,0 +1,15 @@
+# @author Pjh
+.codex/
+.plan/
+__pycache__/
+*.pyc
+.DS_Store
+.playwright-cli/
+graphify-out/
+.env
+.env.*
+!.env.example
+
+# 本地发布准备清单不属于技能内容
+/release-files.txt
+/LICENSES/Graphify-*

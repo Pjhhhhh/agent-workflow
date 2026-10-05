@@ -1,0 +1,164 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "通用复杂任务 · v3 逐项验收",
+    "locale": "zh-CN",
+    "quality_profile": "showcase"
+  },
+  "lanes": [
+    {
+      "id": "main",
+      "label": "主流程"
+    },
+    {
+      "id": "feedback",
+      "label": "失败反馈",
+      "variant": "exception"
+    }
+  ],
+  "mainPath": [
+    "n0",
+    "n1",
+    "n2",
+    "n3",
+    "n4",
+    "n5"
+  ],
+  "nodes": [
+    {
+      "id": "n0",
+      "lane": "main",
+      "col": 0,
+      "type": "external",
+      "label": "原始要求",
+      "width": 150
+    },
+    {
+      "id": "n1",
+      "lane": "main",
+      "col": 1,
+      "type": "backend",
+      "label": "必要契约",
+      "width": 150,
+      "sublabel": "每次验收独立目录 · 允许操作"
+    },
+    {
+      "id": "n2",
+      "lane": "main",
+      "col": 2,
+      "type": "backend",
+      "label": "实际工件",
+      "width": 150,
+      "sublabel": "正文、差异与日志"
+    },
+    {
+      "id": "n3",
+      "lane": "main",
+      "col": 3,
+      "type": "backend",
+      "label": "独立复核",
+      "width": 150,
+      "sublabel": "覆盖、主张与范围"
+    },
+    {
+      "id": "n4",
+      "lane": "main",
+      "col": 4,
+      "type": "backend",
+      "label": "脚本校验",
+      "width": 150,
+      "sublabel": "版本、引用与操作"
+    },
+    {
+      "id": "n5",
+      "lane": "main",
+      "col": 5,
+      "type": "backend",
+      "label": "验收报告",
+      "width": 150,
+      "sublabel": "契约路径绑定 · 写入互斥"
+    },
+    {
+      "id": "repair",
+      "lane": "feedback",
+      "col": 3,
+      "type": "security",
+      "label": "缺口与动作",
+      "sublabel": "遗漏、无依据或范围冲突",
+      "width": 170
+    },
+    {
+      "id": "blocked",
+      "lane": "feedback",
+      "col": 5,
+      "type": "external",
+      "label": "保留未完成",
+      "sublabel": "真实阻碍或停止",
+      "width": 170
+    }
+  ],
+  "edges": [
+    {
+      "from": "n0",
+      "to": "n1",
+      "role": "main"
+    },
+    {
+      "from": "n1",
+      "to": "n2",
+      "role": "main"
+    },
+    {
+      "from": "n2",
+      "to": "n3",
+      "role": "main"
+    },
+    {
+      "from": "n3",
+      "to": "n4",
+      "role": "main"
+    },
+    {
+      "from": "n4",
+      "to": "n5",
+      "role": "main"
+    },
+    {
+      "from": "n4",
+      "to": "repair",
+      "label": "未通过",
+      "role": "error"
+    },
+    {
+      "from": "repair",
+      "to": "n2",
+      "label": "修复后重验",
+      "role": "return"
+    },
+    {
+      "from": "repair",
+      "to": "blocked",
+      "label": "无法继续",
+      "role": "branch"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "按必要结果逐项验收",
+      "items": [
+        "评审查遗漏、来源及范围；父代理保存原判断。",
+        "计划服从目标项目约定；证据归启动目录并按批次隔离。"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "记录保护的实际边界",
+      "items": [
+        "拒绝不同契约覆盖和忙目录写入；不再算总分。",
+        "强杀可留锁；报告非崩溃事务；语义仍需独立复核。"
+      ]
+    }
+  ]
+}

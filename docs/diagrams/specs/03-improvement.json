@@ -1,0 +1,160 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "持续改进 · 真实任务检验",
+    "locale": "zh-CN",
+    "quality_profile": "showcase"
+  },
+  "lanes": [
+    {
+      "id": "main",
+      "label": "主流程"
+    },
+    {
+      "id": "feedback",
+      "label": "失败反馈",
+      "variant": "exception"
+    }
+  ],
+  "mainPath": [
+    "n0",
+    "n1",
+    "n2",
+    "n3",
+    "n4",
+    "n5"
+  ],
+  "nodes": [
+    {
+      "id": "n0",
+      "lane": "main",
+      "col": 0,
+      "type": "external",
+      "label": "真实失败",
+      "width": 150
+    },
+    {
+      "id": "n1",
+      "lane": "main",
+      "col": 1,
+      "type": "backend",
+      "label": "定位原因",
+      "width": 150
+    },
+    {
+      "id": "n2",
+      "lane": "main",
+      "col": 2,
+      "type": "backend",
+      "label": "最小调整",
+      "width": 150
+    },
+    {
+      "id": "n3",
+      "lane": "main",
+      "col": 3,
+      "type": "backend",
+      "label": "原问题复验",
+      "width": 150,
+      "sublabel": "必要回归 · 效果另测"
+    },
+    {
+      "id": "n4",
+      "lane": "main",
+      "col": 4,
+      "type": "backend",
+      "label": "比较收益",
+      "width": 150
+    },
+    {
+      "id": "n5",
+      "lane": "main",
+      "col": 5,
+      "type": "backend",
+      "label": "采用改进",
+      "width": 150
+    },
+    {
+      "id": "repair",
+      "lane": "feedback",
+      "col": 3,
+      "type": "security",
+      "label": "修正假设",
+      "sublabel": "不重复无效尝试",
+      "width": 170
+    },
+    {
+      "id": "blocked",
+      "lane": "feedback",
+      "col": 5,
+      "type": "external",
+      "label": "保留未完成",
+      "sublabel": "真实阻碍或停止",
+      "width": 170
+    }
+  ],
+  "edges": [
+    {
+      "from": "n0",
+      "to": "n1",
+      "role": "main"
+    },
+    {
+      "from": "n1",
+      "to": "n2",
+      "role": "main"
+    },
+    {
+      "from": "n2",
+      "to": "n3",
+      "role": "main"
+    },
+    {
+      "from": "n3",
+      "to": "n4",
+      "role": "main"
+    },
+    {
+      "from": "n4",
+      "to": "n5",
+      "role": "main"
+    },
+    {
+      "from": "n4",
+      "to": "repair",
+      "label": "未通过",
+      "role": "error"
+    },
+    {
+      "from": "repair",
+      "to": "n2",
+      "label": "修复后重验",
+      "role": "return"
+    },
+    {
+      "from": "repair",
+      "to": "blocked",
+      "label": "无法继续",
+      "role": "branch"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "已观察的工程结果",
+      "items": [
+        "规则加载与本地协议已有实际验证记录。",
+        "图文和脚本修复不等于模型可靠性已提升。"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "尚待验证",
+      "items": [
+        "真实模型对照尚未运行，不给成功率承诺。",
+        "正式保留集单独检验，不用它反复挑选规则。"
+      ]
+    }
+  ]
+}

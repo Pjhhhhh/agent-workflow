@@ -1,0 +1,160 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "通用工作流程 · 按任务验收",
+    "locale": "zh-CN",
+    "quality_profile": "showcase"
+  },
+  "lanes": [
+    {
+      "id": "main",
+      "label": "主流程"
+    },
+    {
+      "id": "feedback",
+      "label": "失败反馈",
+      "variant": "exception"
+    }
+  ],
+  "mainPath": [
+    "n0",
+    "n1",
+    "n2",
+    "n3",
+    "n4",
+    "n5"
+  ],
+  "nodes": [
+    {
+      "id": "n0",
+      "lane": "main",
+      "col": 0,
+      "type": "external",
+      "label": "用户目标",
+      "width": 150
+    },
+    {
+      "id": "n1",
+      "lane": "main",
+      "col": 1,
+      "type": "backend",
+      "label": "必要验收",
+      "width": 150
+    },
+    {
+      "id": "n2",
+      "lane": "main",
+      "col": 2,
+      "type": "backend",
+      "label": "实际执行",
+      "width": 150
+    },
+    {
+      "id": "n3",
+      "lane": "main",
+      "col": 3,
+      "type": "backend",
+      "label": "终态证据",
+      "width": 150
+    },
+    {
+      "id": "n4",
+      "lane": "main",
+      "col": 4,
+      "type": "backend",
+      "label": "按任务复核",
+      "width": 150,
+      "sublabel": "简单自检 · 复杂独立评审"
+    },
+    {
+      "id": "n5",
+      "lane": "main",
+      "col": 5,
+      "type": "backend",
+      "label": "完成交付",
+      "width": 150
+    },
+    {
+      "id": "repair",
+      "lane": "feedback",
+      "col": 3,
+      "type": "security",
+      "label": "具体缺口",
+      "sublabel": "漏项、错误或缺证据",
+      "width": 170
+    },
+    {
+      "id": "blocked",
+      "lane": "feedback",
+      "col": 5,
+      "type": "external",
+      "label": "保留未完成",
+      "sublabel": "真实阻碍或停止",
+      "width": 170
+    }
+  ],
+  "edges": [
+    {
+      "from": "n0",
+      "to": "n1",
+      "role": "main"
+    },
+    {
+      "from": "n1",
+      "to": "n2",
+      "role": "main"
+    },
+    {
+      "from": "n2",
+      "to": "n3",
+      "role": "main"
+    },
+    {
+      "from": "n3",
+      "to": "n4",
+      "role": "main"
+    },
+    {
+      "from": "n4",
+      "to": "n5",
+      "role": "main"
+    },
+    {
+      "from": "n4",
+      "to": "repair",
+      "label": "未通过",
+      "role": "error"
+    },
+    {
+      "from": "repair",
+      "to": "n2",
+      "label": "修复后重验",
+      "role": "return"
+    },
+    {
+      "from": "repair",
+      "to": "blocked",
+      "label": "无法继续",
+      "role": "branch"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "通用规则已写入全局",
+      "items": [
+        "目标、执行、证据和回修适用于日常任务。",
+        "纯问答直接回答；复杂或关键冲突安排独立评审。"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "自动化范围",
+      "items": [
+        "复杂任务默认运行 v3；计划与证据留在工作区。",
+        "图不代表自动执行引擎，也不代表全局 Stop 已启用。"
+      ]
+    }
+  ]
+}

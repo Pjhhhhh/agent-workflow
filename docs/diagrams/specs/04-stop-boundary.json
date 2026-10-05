@@ -1,0 +1,160 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "局部实验 · Stop 覆盖范围",
+    "locale": "zh-CN",
+    "quality_profile": "showcase"
+  },
+  "lanes": [
+    {
+      "id": "main",
+      "label": "主流程"
+    },
+    {
+      "id": "feedback",
+      "label": "失败反馈",
+      "variant": "exception"
+    }
+  ],
+  "mainPath": [
+    "n0",
+    "n1",
+    "n2",
+    "n3",
+    "n4",
+    "n5"
+  ],
+  "nodes": [
+    {
+      "id": "n0",
+      "lane": "main",
+      "col": 0,
+      "type": "external",
+      "label": "Stop 事件",
+      "width": 150
+    },
+    {
+      "id": "n1",
+      "lane": "main",
+      "col": 1,
+      "type": "backend",
+      "label": "登记匹配",
+      "width": 150,
+      "sublabel": "同项目 · 同会话 · 同轮次"
+    },
+    {
+      "id": "n2",
+      "lane": "main",
+      "col": 2,
+      "type": "backend",
+      "label": "读取报告",
+      "width": 150
+    },
+    {
+      "id": "n3",
+      "lane": "main",
+      "col": 3,
+      "type": "backend",
+      "label": "复核文件",
+      "width": 150
+    },
+    {
+      "id": "n4",
+      "lane": "main",
+      "col": 4,
+      "type": "backend",
+      "label": "检查结果",
+      "width": 150
+    },
+    {
+      "id": "n5",
+      "lane": "main",
+      "col": 5,
+      "type": "backend",
+      "label": "本次不阻拦",
+      "width": 150
+    },
+    {
+      "id": "repair",
+      "lane": "feedback",
+      "col": 3,
+      "type": "security",
+      "label": "请求继续一次",
+      "sublabel": "仍失败需保留未完成",
+      "width": 170
+    },
+    {
+      "id": "blocked",
+      "lane": "feedback",
+      "col": 5,
+      "type": "external",
+      "label": "保留未完成",
+      "sublabel": "阻碍、停止或硬预算",
+      "width": 170
+    }
+  ],
+  "edges": [
+    {
+      "from": "n0",
+      "to": "n1",
+      "role": "main"
+    },
+    {
+      "from": "n1",
+      "to": "n2",
+      "role": "main"
+    },
+    {
+      "from": "n2",
+      "to": "n3",
+      "role": "main"
+    },
+    {
+      "from": "n3",
+      "to": "n4",
+      "role": "main"
+    },
+    {
+      "from": "n4",
+      "to": "n5",
+      "role": "main"
+    },
+    {
+      "from": "n4",
+      "to": "repair",
+      "label": "未通过",
+      "role": "error"
+    },
+    {
+      "from": "repair",
+      "to": "n2",
+      "label": "重新核验",
+      "role": "return"
+    },
+    {
+      "from": "repair",
+      "to": "blocked",
+      "label": "无法继续",
+      "role": "branch"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "可选实验，不是日常前置",
+      "items": [
+        "仅匹配已登记任务；项目外、未登记或错轮跳过。",
+        "release 保留未完成；空响应不等于任务通过。"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "全局自动接入尚未验证",
+      "items": [
+        "最多请求继续一次，是否执行由宿主决定。",
+        "没有安装全局钩子；次数用尽仍须保留未完成。"
+      ]
+    }
+  ]
+}
