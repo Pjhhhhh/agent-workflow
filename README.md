@@ -27,6 +27,18 @@ npx skills add Pjhhhhh/agent-workflow --skill work-eval
 
 安装不会自动修改 AGENTS.md、接入全局hooks或授予额外操作权限。详细步骤、源码链接安装和重启要求见[安装与更新](docs/安装与更新.md)。
 
+## 按需搭配 Matt Pocock
+
+`work-eval` 负责执行范围和结果验收；[Matt Pocock Skills](https://github.com/mattpocock/skills) 可用于工程任务中的诊断、拆分、实施和代码审查。代理按任务读取适用的已安装技能，不要求每次走完一套阶段。
+
+首次使用时，可以按需安装下面这些技能，并在安装器中选择客户端与安装范围；已经安装的直接复用：
+
+```sh
+npx skills@latest add mattpocock/skills --skill setup-matt-pocock-skills diagnosing-bugs to-tickets code-review ask-matt
+```
+
+示例不包含 `implement`，避免覆盖已有的自管版本。若另选上游 `implement`，其测试和提交步骤仍须遵守目标项目的有效约定与用户授权。首次项目配置、按任务选择和本地版本保护见[安装说明](docs/安装与更新.md#可选matt-pocock工程技能)与[接入规则](skills/work-eval/references/matt-pocock.md)。
+
 ## 技能内容
 
 | 文件 | 作用 |
