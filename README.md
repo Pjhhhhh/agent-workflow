@@ -27,6 +27,16 @@ npx skills add Pjhhhhh/agent-workflow --skill work-eval
 
 安装不会自动修改 AGENTS.md、接入全局hooks或授予额外操作权限。详细步骤、源码链接安装和重启要求见[安装与更新](docs/安装与更新.md)。
 
+## 按需搭配其他技能、插件与 OCR
+
+使用者可以选择自己的技能、插件或CLI；用户指定、项目要求或当前任务确需时才接入，不改变work-eval的默认分流与验收。未安装可选工具时继续使用已有方法；已明确列为必要项的缺口仍须记录。选择原则与OCR用法集中在[可选接入说明](skills/work-eval/references/optional-integrations.md)，它随整个技能目录一起复制即可使用。
+
+已有`ocr`CLI时，可以直接提出：
+
+> 用OCR委派模式审查这次改动。
+
+代理用`ocr delegate`准备文件和规则，再按原任务范围审查并保留证据；无需额外安装官方插件。OCR材料不直接成为独立验收结论，其他插件也按各自说明与当前授权选择。
+
 ## 按需搭配 Matt Pocock
 
 `work-eval` 负责执行范围和结果验收；[Matt Pocock Skills](https://github.com/mattpocock/skills) 可用于工程任务中的诊断、拆分、实施和代码审查。代理按任务读取适用的已安装技能，不要求每次走完一套阶段。
