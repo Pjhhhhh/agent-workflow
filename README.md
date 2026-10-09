@@ -39,6 +39,16 @@ npx skills@latest add mattpocock/skills --skill setup-matt-pocock-skills diagnos
 
 示例不包含 `implement`，避免覆盖已有的自管版本。若另选上游 `implement`，其测试和提交步骤仍须遵守目标项目的有效约定与用户授权。首次项目配置、按任务选择和本地版本保护见[安装说明](docs/安装与更新.md#可选matt-pocock工程技能)与[接入规则](skills/work-eval/references/matt-pocock.md)。
 
+## 按需搭配绘图与代码关系工具
+
+| 工具 | 适用任务 | 来源 |
+| --- | --- | --- |
+| Archify | 架构、流程、时序、数据流与状态图，生成可交互HTML | [官方仓库](https://github.com/tt-a1i/archify) |
+| diagram-design | 更多图型、版式和已有图源导入，生成HTML/SVG等图示 | [官方仓库](https://github.com/cathrynlavery/diagram-design) |
+| Graphify | 查代码、文档的静态关系及潜在影响，生成可查询知识图谱 | [官方仓库](https://github.com/Graphify-Labs/graphify) |
+
+阅读已有图集不要求安装生成工具。需要绘图时，选满足指定格式与可编辑性的一种；需要追查代码关系时才用Graphify。三者不要求同时运行，也不替代实际结果验收。安装命令见[安装说明](docs/安装与更新.md#可选绘图与代码关系工具)。
+
 ## 技能内容
 
 | 文件 | 作用 |
