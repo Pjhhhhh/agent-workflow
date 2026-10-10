@@ -6,6 +6,7 @@ __pycache__/
 .DS_Store
 .playwright-cli/
 graphify-out/
+/docs/research/
 .env
 .env.*
 !.env.example
