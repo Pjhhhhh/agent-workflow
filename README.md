@@ -56,8 +56,11 @@ npx skills@latest add mattpocock/skills --skill setup-matt-pocock-skills diagnos
 | Archify | 架构、流程、时序、数据流与状态图，生成可交互HTML | [官方仓库](https://github.com/tt-a1i/archify) |
 | diagram-design | 更多图型、版式和已有图源导入，生成HTML/SVG等图示 | [官方仓库](https://github.com/cathrynlavery/diagram-design) |
 | Graphify | 查代码、文档的静态关系及潜在影响，生成可查询知识图谱 | [官方仓库](https://github.com/Graphify-Labs/graphify) |
+| Understand-Anything | 开发、运维查看、排障、评审与交接中的系统理解，查询架构层次、依赖链路和业务流程 | [官方仓库](https://github.com/Egonex-AI/Understand-Anything) |
 
 阅读已有图集不要求安装生成工具。选用与协作按[共享技能规则](skills/work-eval/SKILL.md#工具选用与协作)，图集不替代实际结果验收。Archify、diagram-design与Graphify的安装命令见[安装说明](docs/安装与更新.md#可选绘图与代码关系工具)。
+
+Understand-Anything的按需入口、图谱复用和验证边界见[接入说明](skills/work-eval/references/optional-integrations.md#understand-anything系统理解)。
 
 ## 技能内容
 
