@@ -17,7 +17,7 @@ npx skills add Pjhhhhh/agent-workflow --skill work-eval
 
 ## 使用
 
-在 Codex 中显式调用 `$work-eval`，或要求代理读取已安装技能：
+在支持 Agent Skills 的 AI 代理或客户端中，按宿主的技能调用方式使用 work-eval，或要求代理读取已安装技能：
 
 > 使用 work-eval 完成这项任务，核对原始要求和最终工件；有可修的验收缺口就继续，完成后给出结果与验证证据。
 
@@ -25,7 +25,7 @@ npx skills add Pjhhhhh/agent-workflow --skill work-eval
 
 > 处理代码、文档、电脑操作和资料研究时，读取 work-eval 技能并按其分支执行。纯问答直接回答，简单任务直接核验，复杂任务独立评审并逐项验收。记录留在实际工作区，遵守目标项目的权限和测试约定。
 
-安装不会自动修改 AGENTS.md、接入全局hooks或授予额外操作权限。详细步骤、源码链接安装和重启要求见[安装与更新](docs/安装与更新.md)。
+安装不会自动修改 AGENTS.md、接入全局hooks或授予额外操作权限。技能发现、调用方式和独立评审能力以宿主实际支持为准。详细步骤、源码链接安装和重启要求见[安装与更新](docs/安装与更新.md)。
 
 ## 按需搭配其他技能、插件与 OCR
 
@@ -57,7 +57,7 @@ npx skills@latest add mattpocock/skills --skill setup-matt-pocock-skills diagnos
 | diagram-design | 更多图型、版式和已有图源导入，生成HTML/SVG等图示 | [官方仓库](https://github.com/cathrynlavery/diagram-design) |
 | Graphify | 查代码、文档的静态关系及潜在影响，生成可查询知识图谱 | [官方仓库](https://github.com/Graphify-Labs/graphify) |
 
-阅读已有图集不要求安装生成工具。需要绘图时，选满足指定格式与可编辑性的一种；需要追查代码关系时才用Graphify。三者不要求同时运行，也不替代实际结果验收。安装命令见[安装说明](docs/安装与更新.md#可选绘图与代码关系工具)。
+阅读已有图集不要求安装生成工具。选用与协作按[共享技能规则](skills/work-eval/SKILL.md#工具选用与协作)，图集不替代实际结果验收。Archify、diagram-design与Graphify的安装命令见[安装说明](docs/安装与更新.md#可选绘图与代码关系工具)。
 
 ## 技能内容
 
