@@ -167,6 +167,7 @@ def evaluate(contract: PathLike, judgment: PathLike) -> dict[str, Any]:
     if len(ids) != len(set(ids)) or set(ids) != {x["id"] for x in c["criteria"]}:
         raise ValueError("评审遗漏、重复或新增了验收项")
     failures, unknown = [], []
+    binding_needed = False
     coverage = j.get("coverage")
     if not isinstance(coverage, dict) or coverage.get("status") not in {"pass", "fail", "unverified"}:
         raise ValueError("必须单独核对原要求覆盖coverage")
@@ -195,10 +196,13 @@ def evaluate(contract: PathLike, judgment: PathLike) -> dict[str, Any]:
             unknown.append("原要求覆盖尚未核实")
     if reviewed_contract != contract_hash or digest(contract) != contract_hash:
         unknown.append("验收目标或要求已不同于评审者检查的契约")
+        binding_needed = True
     if reviewed_hashes != hashes:
         unknown.append("工件已不同于评审者检查的版本")
+        binding_needed = True
     if digest(judgment) != judgment_hash:
         unknown.append("评审文件在读取期间已变化")
+        binding_needed = True
     required = {x["id"] for x in c["criteria"] if x["required"]}
     for item in items:
         reason(item)
@@ -292,8 +296,9 @@ def evaluate(contract: PathLike, judgment: PathLike) -> dict[str, Any]:
                 next_action("scope", "停止未授权操作，核对实际影响并在现有授权内修复；额外需求单独交用户决定")
     if any(h is None for h in hashes.values()):
         unknown.append("声明的工件不存在或不是文件")
-    if unknown and "binding" not in action_ids:
-        actions.append({"id": "binding", "action": "核对原要求、当前工件和版本缺口，读取实际对象后重新评审"})
+        binding_needed = True
+    if binding_needed:
+        next_action("binding", "核对原要求、当前工件和版本缺口，读取实际对象后重新评审")
     reviewer = j.get("reviewer", {})
     if not isinstance(reviewer, dict) or reviewer.get("kind") not in {"independent", "self"} or not isinstance(reviewer.get("id"), str) or not reviewer["id"].strip():
         raise ValueError("必须记录评审者kind和id")

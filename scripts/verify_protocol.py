@@ -120,36 +120,42 @@ def scenario(name: str, edit: FixtureEdit = None) -> tuple:
     return cp, jp, artifact
 
 
-def score_case(name: str, edit: FixtureEdit, code: int, status: Optional[str] = None) -> tuple:
+def score_case(name: str, edit: FixtureEdit, code: int, status: Optional[str] = None,
+               expected_actions: Optional[set[str]] = None) -> tuple:
     cp, jp, artifact = scenario(name, edit)
     rc, report = call(name, ['score', cp, jp])
     check(name, rc == code and (status is None or report.get('status') == status))
+    if expected_actions is not None:
+        actions = report.get('next_actions', [])
+        original = json.loads(jp.read_text(encoding='utf-8'))['next_actions']
+        check(name + '-下一动作准确且保留原判断', {x['id'] for x in actions} == expected_actions
+              and all(x in actions for x in original) and len(actions) == len(expected_actions))
     return cp, jp, artifact, report
 
 
-success = score_case('成功', None, 0, 'pass')
-failure = score_case('必要失败仍满分', lambda c, j, a: (j.update(dimensions={'scope': {'rating': 5}}), j['criteria'][0].update(status='fail')), 1, 'fail')
+success = score_case('成功', None, 0, 'pass', set())
+failure = score_case('必要失败仍满分', lambda c, j, a: (j.update(dimensions={'scope': {'rating': 5}}), j['criteria'][0].update(status='fail')), 1, 'fail', {'C1'})
 check('旧分数不再输出且不能放行失败', 'score' not in failure[3] and 'dimensions' not in failure[3] and failure[3].get('status') == 'fail')
-score_case('未验证', lambda c, j, a: j['criteria'][0].update(status='unverified'), 1, 'partial')
-score_case('必要项无证据', lambda c, j, a: j['criteria'][0].update(evidence=[]), 1, 'partial')
+score_case('未验证', lambda c, j, a: j['criteria'][0].update(status='unverified', reason='现场必要项尚未验证'), 1, 'partial', {'C1'})
+score_case('必要项无证据', lambda c, j, a: j['criteria'][0].update(evidence=[]), 1, 'partial', {'C1'})
 score_case('遗漏验收', lambda c, j, a: j.update(criteria=[]), 2)
 score_case('重复验收', lambda c, j, a: j['criteria'].append(copy.deepcopy(j['criteria'][0])), 2)
 score_case('忽略旧布尔评分', lambda c, j, a: j.update(dimensions={'scope': {'rating': True}}), 0, 'pass')
 score_case('非有限分数', lambda c, j, a: j.update(dimensions={'scope': {'rating': float('nan')}}), 2)
 score_case('忽略旧畸形维度', lambda c, j, a: j.update(dimensions='obsolete'), 0, 'pass')
 score_case('空理由', lambda c, j, a: j['criteria'][0].update(reason=''), 2)
-self_review = score_case('自评分', lambda c, j, a: j['reviewer'].update(kind='self'), 1, 'provisional')
+self_review = score_case('自评分', lambda c, j, a: j['reviewer'].update(kind='self'), 1, 'provisional', {'protocol'})
 self_markdown = (self_review[0].parent / 'work-eval-score.md').read_text(encoding='utf-8')
 check('自检报告明确独立评审未完成', '独立评审未完成' in self_markdown and '必要项证据缺口' in self_markdown)
 check('自检自动提示补审', any(x['id'] == 'protocol' and '独立评审' in x['action'] for x in self_review[3]['next_actions']))
-self_failure = score_case('自检失败优先', lambda c, j, a: (j['reviewer'].update(kind='self'), j['criteria'][0].update(status='fail')), 1, 'fail')
-self_unknown = score_case('自检未知优先', lambda c, j, a: (j['reviewer'].update(kind='self'), j['criteria'][0].update(status='unverified')), 1, 'partial')
+self_failure = score_case('自检失败优先', lambda c, j, a: (j['reviewer'].update(kind='self'), j['criteria'][0].update(status='fail')), 1, 'fail', {'C1', 'protocol'})
+self_unknown = score_case('自检未知优先', lambda c, j, a: (j['reviewer'].update(kind='self'), j['criteria'][0].update(status='unverified')), 1, 'partial', {'C1', 'protocol'})
 check('自检失败未知也显示评审缺口', all('独立评审未完成' in (x[0].parent / 'work-eval-score.md').read_text(encoding='utf-8') for x in (self_failure, self_unknown)))
 self_recovery = score_case('自检保留恢复动作', lambda c, j, a: (j['reviewer'].update(kind='self'), j['next_actions'].append({'id': 'protocol', 'action': '容量恢复后补独立评审'})), 1, 'provisional')
 check('不重复改写已有恢复动作', [x for x in self_recovery[3]['next_actions'] if x['id'] == 'protocol'] == [{'id': 'protocol', 'action': '容量恢复后补独立评审'}])
 check('独立通过没有自检提示', '独立评审未完成' not in (success[0].parent / 'work-eval-score.md').read_text(encoding='utf-8'))
-score_case('契约同ID已变', lambda c, j, a: c.update(goal='修改后的目标'), 1, 'partial')
-score_case('工件已变', lambda c, j, a: a.write_text('变化的版本', encoding='utf-8'), 1, 'partial')
+score_case('契约同ID已变', lambda c, j, a: c.update(goal='修改后的目标'), 1, 'partial', {'binding'})
+score_case('工件已变', lambda c, j, a: a.write_text('变化的版本', encoding='utf-8'), 1, 'partial', {'F1', 'binding'})
 
 def missing(c: dict, j: dict, artifact: Path) -> None:
     """声明缺失文件，不删除任何现有文件。@author Pjh"""
@@ -159,7 +165,15 @@ def missing(c: dict, j: dict, artifact: Path) -> None:
     j['contract_sha256'] = sha(artifact.parent / 'contract.json')
     j['artifact_hashes'][path] = None
 
-score_case('缺失文件', missing, 1, 'partial')
+score_case('缺失文件', missing, 1, 'partial', {'binding'})
+score_case('声明目录不是文件', lambda c, j, a: (c['artifacts'].append(str(a.parent)),
+           j['artifact_hashes'].update({str(a.parent): None}), refresh_contract(c, j, a)), 1, 'partial', {'binding'})
+score_case('现场未验证兼版本失效', lambda c, j, a: (j['criteria'][0].update(status='unverified'),
+           j['artifact_hashes'].update({str(a): '0' * 64})), 1, 'partial', {'C1', 'binding'})
+score_case('必要失败兼版本失效', lambda c, j, a: (j['criteria'][0].update(status='fail'),
+           j['artifact_hashes'].update({str(a): '0' * 64})), 1, 'fail', {'C1', 'binding'})
+score_case('保留已有binding动作', lambda c, j, a: (j['artifact_hashes'].update({str(a): '0' * 64}),
+           j['next_actions'].append({'id': 'binding', 'action': '按原判断核对失效工件后重评'})), 1, 'partial', {'binding'})
 
 def optional(c: dict, j: dict, artifact: Path) -> None:
     c['criteria'].append({'id': 'O1', 'description': '可选项', 'required': False})
@@ -167,7 +181,7 @@ def optional(c: dict, j: dict, artifact: Path) -> None:
     j['contract_sha256'] = sha(artifact.parent / 'contract.json')
     j['criteria'].append({'id': 'O1', 'status': 'pass', 'reason': '缺证据', 'evidence': []})
 
-opt = score_case('可选项无证据', optional, 0, 'pass')
+opt = score_case('可选项无证据', optional, 0, 'pass', {'O1'})
 check('可选项不伪标通过', opt[3]['criteria'][1]['status'] == 'unverified')
 
 score_case('低分必要通过', lambda c, j, a: j.update(dimensions={'scope': {'rating': 1, 'evidence': []}}), 0, 'pass')
@@ -175,54 +189,58 @@ current = score_case('默认无旧评分', None, 0, 'pass')
 check('当前输出无旧评分字段', 'score' not in current[3] and 'dimensions' not in current[3])
 rendered = (current[0].parent / 'work-eval-score.md').read_text(encoding='utf-8')
 check('可读报告逐项展示', '| C1 | pass |' in rendered and '维度' not in rendered and '可选描述分数' not in rendered)
-score_case('原请求未核对', lambda c, j, a: j['coverage'].update(status='unverified'), 1, 'partial')
+score_case('原请求未核对', lambda c, j, a: j['coverage'].update(status='unverified'), 1, 'partial', {'coverage'})
 score_case('原要求遗漏', lambda c, j, a: j['coverage'].update(missing_requirements=['要求还包括可编辑性']), 1, 'fail')
 score_case('失败无下一动作', lambda c, j, a: j['criteria'][0].update(status='fail'), 2)
 score_case('遗漏无下一动作', lambda c, j, a: j['coverage'].update(missing_requirements=['本例漏项']), 2)
-score_case('原请求已变', lambda c, j, a: Path(c['request_artifact']).write_text('新原要求', encoding='utf-8'), 1, 'partial')
+score_case('原请求已变', lambda c, j, a: Path(c['request_artifact']).write_text('新原要求', encoding='utf-8'), 1, 'partial', {'scope', 'binding'})
 score_case('缺覆盖检查', lambda c, j, a: j.pop('coverage'), 2)
 score_case('真实性失败无动作', lambda c, j, a: j['integrity'].update(status='fail'), 2)
 score_case('真实性失败有动作', lambda c, j, a: (j['integrity'].update(status='fail'), j['next_actions'].append({'id': 'integrity', 'action': '核验原始证据，原授权内修复后重评'})), 1, 'fail')
 score_case('真实性未验证无动作', lambda c, j, a: j['integrity'].update(status='unverified'), 2)
+score_case('真实性未验证保留动作', lambda c, j, a: (j['integrity'].update(status='unverified'),
+           j['next_actions'].append({'id': 'integrity', 'action': '补取实际真实性核查证据'})), 1, 'partial', {'integrity'})
 
 # 先冻结这些黑盒失败输入，再修改验收器，避免只检查实现自己选择的成功路径。
-score_case('原要求冒充完成证据', lambda c, j, a: j['criteria'][0].update(evidence=[c['request_artifact']]), 1, 'partial')
-score_case('真实性通过无核查证据', lambda c, j, a: j['integrity'].update(evidence=[]), 1, 'partial')
+score_case('原要求冒充完成证据', lambda c, j, a: j['criteria'][0].update(evidence=[c['request_artifact']]), 1, 'partial', {'C1'})
+score_case('真实性通过无核查证据', lambda c, j, a: j['integrity'].update(evidence=[]), 1, 'partial', {'integrity'})
 score_case('推断冒充事实', lambda c, j, a: j['claims'][0].update(basis='inferred'), 1, 'fail')
 score_case('反证仍称事实', lambda c, j, a: j['claims'][0].update(basis='contradicted'), 1, 'fail')
-score_case('未知仍称事实', lambda c, j, a: j['claims'][0].update(basis='missing', sources=[]), 1, 'partial')
-score_case('事实缺来源', lambda c, j, a: j['claims'][0].update(sources=[]), 1, 'partial')
-score_case('伪造引用正文', lambda c, j, a: j['claims'][0]['sources'][0].update(quote='日志中并不存在的全系统通过'), 1, 'partial')
-score_case('引用行号错误', lambda c, j, a: j['claims'][0]['sources'][0].update(line=2), 1, 'partial')
+score_case('未知仍称事实', lambda c, j, a: j['claims'][0].update(basis='missing', sources=[]), 1, 'partial', {'F1'})
+score_case('事实缺来源', lambda c, j, a: j['claims'][0].update(sources=[]), 1, 'partial', {'F1'})
+score_case('伪造引用正文', lambda c, j, a: j['claims'][0]['sources'][0].update(quote='日志中并不存在的全系统通过'), 1, 'partial', {'F1'})
+score_case('引用行号错误', lambda c, j, a: j['claims'][0]['sources'][0].update(line=2), 1, 'partial', {'F1'})
 score_case('引用行号为布尔值', lambda c, j, a: j['claims'][0]['sources'][0].update(line=True), 2)
 score_case('空引用片段', lambda c, j, a: j['claims'][0]['sources'][0].update(quote=''), 2)
-score_case('请求冒充事实来源', lambda c, j, a: j['claims'][0]['sources'][0].update(artifact=c['request_artifact'], quote='写入合成协议工件'), 1, 'partial')
-binary = score_case('引用非UTF8正文', lambda c, j, a: (a.write_bytes(b'\xff\xfe'), j['artifact_hashes'].update({str(a): sha(a)})), 1, 'partial')
+score_case('请求冒充事实来源', lambda c, j, a: j['claims'][0]['sources'][0].update(artifact=c['request_artifact'], quote='写入合成协议工件'), 1, 'partial', {'F1'})
+binary = score_case('引用非UTF8正文', lambda c, j, a: (a.write_bytes(b'\xff\xfe'), j['artifact_hashes'].update({str(a): sha(a)})), 1, 'partial', {'F1'})
 check('非UTF8仅因正文无法核查', any(x.startswith('F1:') for x in binary[3].get('unverified', [])) and not any('工件已不同' in x for x in binary[3].get('unverified', [])))
 score_case('主张未登记', lambda c, j, a: j.pop('claims'), 2)
 score_case('主张清单为空', lambda c, j, a: j.update(claims=[]), 2)
 score_case('主张ID重复', lambda c, j, a: j['claims'].append(copy.deepcopy(j['claims'][0])), 2)
 score_case('主张分类无效', lambda c, j, a: j['claims'][0].update(kind='certified'), 2)
 score_case('必要标记不是布尔值', lambda c, j, a: j['claims'][0].update(required=1), 2)
-score_case('必要结论仍未知', lambda c, j, a: j['claims'][0].update(kind='unknown', basis='missing', sources=[]), 1, 'partial')
-score_case('保留可选未知', lambda c, j, a: j['claims'][0].update(kind='unknown', basis='missing', required=False, sources=[]), 0, 'pass')
+score_case('必要结论仍未知', lambda c, j, a: j['claims'][0].update(kind='unknown', basis='missing', sources=[]), 1, 'partial', {'F1'})
+score_case('保留可选未知', lambda c, j, a: j['claims'][0].update(kind='unknown', basis='missing', required=False, sources=[]), 0, 'pass', set())
 score_case('注明可选推断', lambda c, j, a: j['claims'][0].update(kind='inference', basis='inferred', required=False), 0, 'pass')
 score_case('未授权文件修改', lambda c, j, a: j['scope']['actions'].append({'operation': 'write', 'target': str(a.parent / '旁路文件.txt')}), 1, 'fail')
 score_case('未授权安装', lambda c, j, a: j['scope']['actions'].append({'operation': 'install', 'target': '额外软件'}), 1, 'fail')
 score_case('未授权发布', lambda c, j, a: j['scope']['actions'].append({'operation': 'publish', 'target': '外部站点'}), 1, 'fail')
-score_case('范围核查无证据', lambda c, j, a: j['scope'].update(evidence=[]), 1, 'partial')
-score_case('请求冒充范围核查证据', lambda c, j, a: j['scope'].update(evidence=[c['request_artifact']]), 1, 'partial')
+score_case('范围核查无证据', lambda c, j, a: j['scope'].update(evidence=[]), 1, 'partial', {'scope'})
+score_case('请求冒充范围核查证据', lambda c, j, a: j['scope'].update(evidence=[c['request_artifact']]), 1, 'partial', {'scope'})
+score_case('范围未验证保留动作', lambda c, j, a: (j['scope'].update(status='unverified'),
+           j['next_actions'].append({'id': 'scope', 'action': '补取完整实际操作记录'})), 1, 'partial', {'scope'})
 score_case('允许操作缺失', lambda c, j, a: c.pop('scope'), 2)
 score_case('实际操作缺失', lambda c, j, a: j['scope'].pop('actions'), 2)
 score_case('实际操作畸形', lambda c, j, a: j['scope']['actions'].append('write'), 2)
-authorization = score_case('授权引文不存在', lambda c, j, a: (c['scope']['allowed_actions'][0].update(request_quote='顺便安装软件并发布'), refresh_contract(c, j, a)), 1, 'partial')
+authorization = score_case('授权引文不存在', lambda c, j, a: (c['scope']['allowed_actions'][0].update(request_quote='顺便安装软件并发布'), refresh_contract(c, j, a)), 1, 'partial', {'scope'})
 check('授权引文缺失原因准确', any('授权引文' in x for x in authorization[3].get('unverified', [])))
-legacy = score_case('旧协议不能绕过新核查', lambda c, j, a: (c.pop('schema_version'), c.pop('scope'), j.pop('claims'), j.pop('scope'), refresh_contract(c, j, a)), 1, 'partial')
+legacy = score_case('旧协议不能绕过新核查', lambda c, j, a: (c.pop('schema_version'), c.pop('scope'), j.pop('claims'), j.pop('scope'), refresh_contract(c, j, a)), 1, 'partial', {'protocol'})
 check('旧格式缺新核查原因准确', any('旧协议' in x for x in legacy[3].get('unverified', [])))
 for mode in ['alias', 'symlink', 'hardlink']:
-    score_case('请求同文件冒用-' + mode, lambda c, j, a, mode=mode: request_alias(c, j, a, mode), 1, 'partial')
+    score_case('请求同文件冒用-' + mode, lambda c, j, a, mode=mode: request_alias(c, j, a, mode), 1, 'partial', {'C1'})
 for channel in ['claims', 'integrity', 'scope']:
-    score_case('请求链接冒用-' + channel, lambda c, j, a, channel=channel: request_alias(c, j, a, 'symlink', channel), 1, 'partial')
+    score_case('请求链接冒用-' + channel, lambda c, j, a, channel=channel: request_alias(c, j, a, 'symlink', channel), 1, 'partial', {'F1' if channel == 'claims' else channel})
 for identifier in ['scope', 'integrity', 'binding', 'C1']:
     score_case('主张ID与动作冲突-' + identifier, lambda c, j, a, identifier=identifier: j['claims'][0].update(id=identifier), 2)
 score_case('验收ID与动作冲突', lambda c, j, a: (c['criteria'][0].update(id='scope'), j['criteria'][0].update(id='scope'), refresh_contract(c, j, a)), 2)
