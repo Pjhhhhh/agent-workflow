@@ -31,6 +31,8 @@ npx skills add Pjhhhhh/agent-workflow --skill work-eval
 
 使用者可以选择自己的技能、插件或CLI；用户指定、项目要求或当前任务确需时才接入，不改变work-eval的默认分流与验收。未安装可选工具时继续使用已有方法；已明确列为必要项的缺口仍须记录。选择原则与OCR用法集中在[可选接入说明](skills/work-eval/references/optional-integrations.md)，它随整个技能目录一起复制即可使用。
 
+编写代理规则或技能时，`writing-for-agents` 的选用、来源、安装与缺失处理见[代理文档写作分支](skills/work-eval/references/optional-integrations.md#writing-for-agents代理文档写作)。
+
 已有`ocr`CLI时，可以直接提出：
 
 > 用OCR委派模式审查这次改动。

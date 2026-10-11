@@ -13,6 +13,19 @@ work-eval负责任务分流、范围、验证和交付。使用者可以搭配�
 
 Matt Pocock工程技能按[现有接入规则](matt-pocock.md)使用；已有绘图或代码关系工具按主技能的任务入口选择。其他技能与插件按自身有效说明接入，无需注册到本工作流，也不改写本工作流的默认依赖。
 
+## writing-for-agents：代理文档写作
+
+编写或改写代理规则、技能及其引用的代理文档时，按可用性选择：
+
+- 当前有效技能可定位且正文可读取：读取它的 `SKILL.md`，按对应分支编辑与核验；编辑技能时，同时读取它引用的 `SKILL-MECHANICS.md`。核对触发条件、分层引用、规则重复和完成条件。
+- 未安装、无法定位或正文不可读取：沿用work-eval的文件保护、范围与结果核验规则继续可做的工作，说明缺口和实际采用的方法，不声称已执行该专项技能。用户或项目明确将它列为必要项时，保留该项未完成；安装与配置仍按当前授权，不自动执行。
+
+来源为[Matt Pocock官方技能](https://github.com/mattpocock/skills/blob/main/skills/productivity/writing-for-agents/SKILL.md)。需要安装时，按当前授权选择客户端与范围；已有同名技能先核对来源和定制差异：
+
+```sh
+npx skills add mattpocock/skills --skill writing-for-agents
+```
+
 ## Understand-Anything：系统理解
 
 [Understand-Anything](https://github.com/Egonex-AI/Understand-Anything)用于开发、运维查看、排障、评审和交接中的系统理解，帮助查模块职责、架构层次、依赖链路与业务流程。用户或项目已有工具选择时优先遵循；已安装、可发现且当前任务确需这些能力时，可按需选用，无需用户逐次指定。新人学习只是导览的一种场景。
