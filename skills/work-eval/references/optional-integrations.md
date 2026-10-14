@@ -26,6 +26,21 @@ Matt Pocock工程技能按[现有接入规则](matt-pocock.md)使用；已有绘
 npx skills add mattpocock/skills --skill writing-for-agents
 ```
 
+<a id="项目验证与性能结论技能pstack-移植"></a>
+
+## 项目验证、性能结论与变更影响技能（pstack 移植）
+
+使用者已安装且能定位并读取 `create-verification-skill`、`maintain-verification-skill`、`benchmark-checklist`、`blast-radius` 或 `correct` 时，按当前缺口选择入口，不同时启动整套。保留目标项目既有规划与 work-eval 验收入口；技能的自动选择方式以当前宿主的有效元数据为准，实际调用仍须满足下列触发和授权，不把发现技能视为行为验证。
+
+- **已有 `verify-<app>`**：直接调它驱动应用，按其中的 Launch／Doctor／Drive／Evidence／Cleanup 执行；日常验证不需要 create 或 maintain。
+- **没有可靠项目验证入口，且需反复实跑同一应用或用户明确要求生成**：用 `create-verification-skill`，优先复用已有交互工具。交付前按自身说明实跑一个功能并确认清理后证据仍在；只写完说明仍是草稿。
+- **已有验证技能／功能地图随应用漂移，或用户要求维护**：用 `maintain-verification-skill`，不限于 create 生成的技能。完整维护须覆盖全部映射功能的源码与真实交互，报告 clean／changed／blocked；部分巡检可以说明局部范围，不能称完整维护通过。
+- **要给出性能数字或据此选型**：用 `benchmark-checklist` 核 limiter、调平、上限算术、错误计数、可复现、端到端占比与工作是否真发生。单次粗估只需核第 4 与第 7 问并声明是一次运行；选项对比不适用该例外。
+- **变更安全不能由局部 diff 确认，或需要核对跨边界影响**：用 `blast-radius` 调查实际依赖、数据与时序，运行真实代码证明关键安全事实，交付风险、排除项和复现证据。结果进入原 OCR／code-review 或既有独立验收，不新增同范围第二评审。
+- **同一类已证实错误在本仓库反复出现**：用 `correct` 优先形成架构、类型、lint／CI、行为测试约束，文档与规则最后写，每条新检查须用真实历史错误证明会失败。
+
+驱动实例、端口、数据与清理属有副作用操作；生成物写入、逐类改动、提交和外部调用按当前授权执行，调用技能不扩大权限，结论回到原任务验收。共享实例避免并发驾驶；临时产物与正式证据按实际项目约定存放。来源为 pstack 的五份技能（作者 Lauren Tan／poteto，MIT，固定提交 `fe53d9e9093dbb9ae298563b1a9d702dd6e2ca08`，manifest 0.15.21）；技能正文不随本仓库分发。自行安装或适配时保留上游许可原文并记录本地差异；调用与运行效果以当前任务的实际证据为准，收益仍需对照验证。未安装或无法读取时沿用可用方法并保留必要缺口，不声称已调用。
+
 ## Understand-Anything：系统理解
 
 [Understand-Anything](https://github.com/Egonex-AI/Understand-Anything)用于开发、运维查看、排障、评审和交接中的系统理解，帮助查模块职责、架构层次、依赖链路与业务流程。用户或项目已有工具选择时优先遵循；已安装、可发现且当前任务确需这些能力时，可按需选用，无需用户逐次指定。新人学习只是导览的一种场景。
