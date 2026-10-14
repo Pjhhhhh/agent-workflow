@@ -1,11 +1,11 @@
 <!-- @author Pjh：按现有CLI记录入口、前置条件、终态和副作用，帮助恢复任务时找到实际功能；说明不授予新权限。 -->
 # 验收功能入口
 
-适用版本：v3；score 通用，arm/release/hook 仍是维护项目内的可选实验。按技能完成分流后，以技能真实目录定位脚本，以当前验收目录绝对路径定位原要求与 [输入协议](rubric.md)，准备真实契约和评审工件；表中参数表示文件或值，不能把它们当成已有输入。当前工具不包含业务执行器，不会修复工件里的业务问题。
+score 通用，arm/release/hook 仍是维护项目内的可选实验。按技能完成分流后，以技能真实目录定位脚本，以当前验收目录绝对路径定位原要求与 [输入协议](rubric.md)，准备真实契约和评审工件；表中参数表示文件或值，不能把它们当成已有输入。当前工具不包含业务执行器，不会修复工件里的业务问题。
 
 | 功能 | 真实入口 | 前置条件与应观察结果 | 产生的状态或文件 |
 |---|---|---|---|
-| 汇总验收 | `work_eval.py score 契约文件 评审文件` | v3输入、真实工件及评审哈希完整；退出0为pass，1为fail/partial/provisional，2为输入或读取错误。读取具体缺口及动作，不用总分判完成 | 契约目录的 `work-eval-score.json` 和 `.md`，报告绑定 contract_path；同目录忙、旧报告缺路径或属于其他契约时退出2且不覆盖。无效输入可能留下旧报告，必须看本次退出码及版本 |
+| 汇总验收 | `work_eval.py score 契约文件 评审文件` | 契约与评审输入、真实工件及评审哈希完整；退出0为pass，1为fail/partial/provisional，2为输入或读取错误。读取具体缺口及动作，不用总分判完成 | 契约目录的 `work-eval-score.json` 和 `.md`，报告绑定 contract_path；同目录忙、旧报告缺路径或属于其他契约时退出2且不覆盖。无效输入可能留下旧报告，必须看本次退出码及版本 |
 | 登记本轮任务 | `work_eval.py arm 契约文件 --session 实际会话ID --turn 实际轮次ID --cwd 启动目录` | 必须从含根标记和标准源码布局的完整 agent-workflow 维护仓库运行，目录属于该项目；单独安装技能时拒绝门禁；session使用字母、数字、下划线或短横线；检查active内的原契约路径、哈希、session、turn | 启动目录 `.codex/work-eval/实际会话ID/active.json`；同轮重登记保留已用续跑次数 |
 | 保留未完成退出 | `work_eval.py release --session 实际会话ID --turn 实际轮次ID --cwd 启动目录 --reason external_block --detail 具体阻碍和恢复条件` | 匹配已登记轮次；reason为user_stop/external_block/hard_budget。未完成退出不改成pass | active中的release；报告和缺口仍保留 |
 | 检查Stop协议 | `work_eval.py hook`，从stdin传JSON事件 | 仅当前已登记session/turn；首次必要缺口请求block，最多续跑一次；新轮未登记和项目外返回空对象。空响应可能是隔离跳过，不能单独证明任务通过 | 必要时更新continuations；本流程没有安装原生hook，CLI回放不证明宿主会继续执行 |

@@ -69,12 +69,12 @@ Understand-Anything的按需入口、图谱复用和验证边界见[接入说明
 | 文件 | 作用 |
 | --- | --- |
 | [SKILL.md](skills/work-eval/SKILL.md) | 执行分流、验证、回修与交付 |
-| [rubric.md](skills/work-eval/references/rubric.md) | v3契约和评审输入格式 |
+| [rubric.md](skills/work-eval/references/rubric.md) | 契约和评审输入格式 |
 | [safety.md](skills/work-eval/references/safety.md) | 来源、范围、模板格式和恢复核查 |
 | [features.md](skills/work-eval/references/features.md) | CLI入口与记录行为 |
 | [work_eval.py](skills/work-eval/scripts/work_eval.py) | 确定性的记录、引文、版本和声明操作检查 |
 
-验收结果为 `pass`、`fail`、`partial` 或 `provisional`；不使用五维总分。自检不会变成独立通过，工件变化后旧判断不能直接沿用。
+验收结果为 `pass`、`fail`、`partial` 或 `provisional`；不使用旧的维度总分。自检不会变成独立通过，工件变化后旧判断不能直接沿用。
 
 ## 示例与验证
 

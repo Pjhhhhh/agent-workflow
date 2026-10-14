@@ -109,10 +109,10 @@ def contract_data(path: PathLike) -> tuple[dict[str, Any], str]:
         raise ValueError("schema_version须为2或3")
     if version == 3:
         if set(ids) & RESERVED_ACTION_IDS:
-            raise ValueError("v3 criterion id不能占用系统核查动作ID")
+            raise ValueError("criterion id不能占用系统核查动作ID")
         scope = data.get("scope")
         if not isinstance(scope, dict) or not isinstance(scope.get("allowed_actions"), list):
-            raise ValueError("v3须声明scope.allowed_actions，纯只读可为空")
+            raise ValueError("须声明scope.allowed_actions，纯只读可为空")
         keys = []
         for item in scope["allowed_actions"]:
             keys.append(action_key(item))
@@ -237,11 +237,11 @@ def evaluate(contract: PathLike, judgment: PathLike) -> dict[str, Any]:
         next_action("integrity", "读取实际差异和工具日志，补齐真实性及授权核查证据后重评")
     if c.get("schema_version", 2) != 3:
         unknown.append("旧协议未启用关键主张与操作范围核查")
-        next_action("protocol", "按v3补齐关键主张来源、允许操作及实际操作核查后重评")
+        next_action("protocol", "补齐关键主张来源、允许操作及实际操作核查后重评")
     else:
         claims = j.get("claims")
         if not isinstance(claims, list) or not claims:
-            raise ValueError("v3须逐条记录关键claims，不能用空清单跳过")
+            raise ValueError("须逐条记录关键claims，不能用空清单跳过")
         claim_ids = set()
         reserved = RESERVED_ACTION_IDS | set(ids)
         for item in claims:
@@ -276,7 +276,7 @@ def evaluate(contract: PathLike, judgment: PathLike) -> dict[str, Any]:
                 next_action(item["id"], problem)
         scope = j.get("scope")
         if not isinstance(scope, dict) or scope.get("status") not in {"pass", "fail", "unverified"} or not isinstance(scope.get("actions"), list):
-            raise ValueError("v3须有scope状态与实际actions列表")
+            raise ValueError("scope须有状态与实际actions列表")
         reason(scope)
         if scope["status"] != "pass" and "scope" not in action_ids:
             raise ValueError("范围缺口必须有下一动作")

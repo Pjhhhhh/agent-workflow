@@ -1,7 +1,7 @@
 <!-- @author Pjh -->
-# 工作验收协议 v3
+# 工作验收协议
 
-主结果：`fail` = 必要结果、原要求覆盖、事实表述或操作范围明确失败；`partial` = 必要项未验证、引用缺失、范围未核查或版本不一致；`provisional` = 仅作者自检；`pass` = 以上缺口均无，且为独立评审。新任务只使用 v3 逐项验收，不填写旧五维分数。旧 v2 和未声明 schema_version 的输入仍可读取，但缺少新核查只能得到 partial 或 fail，不能继续得到 pass。
+主结果：`fail` = 必要结果、原要求覆盖、事实表述或操作范围明确失败；`partial` = 必要项未验证、引用缺失、范围未核查或版本不一致；`provisional` = 仅作者自检；`pass` = 以上缺口均无，且为独立评审。新任务只做逐项验收，不填写旧的维度总分。未声明 schema_version 的旧输入仍可读取，但缺少新核查只能得到 partial 或 fail，不能继续得到 pass。
 
 自检报告单独显示“独立评审未完成”；必要项证据缺口为空也不表示整体验收完成。self 且缺少 protocol 下一动作时，脚本补充新目录补审提示；已有恢复动作保留原文。失败与证据缺口仍优先产生 fail / partial，不因 self 降为 provisional。
 
@@ -36,7 +36,7 @@ task_type 为 code / document / computer / research / mixed；至少一项 requi
 
 版本比对须保留能复现结论的原始输入，例如上游归档与更新前备份，并将必要输入纳入 artifacts。逐字节一致、有意保留的本地差异、仅检查部分文件须分别记录；不要把忽略署名等差异后的比较写成“无差异”。安装工具列出的可见路径只能证明枚举结果，宿主发现技能、读取正文和实际执行分别需要对应证据。
 
-v3 的 criterion/claim ID 不占用 coverage、integrity、scope、binding、protocol；claim ID 也不与 criterion ID 重复，以免不同缺口的下一动作混淆。推荐必要项用 C1、关键主张用 F1。
+criterion/claim ID 不占用 coverage、integrity、scope、binding、protocol；claim ID 也不与 criterion ID 重复，以免不同缺口的下一动作混淆。推荐必要项用 C1、关键主张用 F1。
 
 scope.allowed_actions 记录业务文件写入、删除、命令执行、安装、发送与发布，operation 为 write / delete / execute / install / send / publish。target 是精确目标；write/delete 必须用规范化绝对路径。request_quote 引用原请求中支持该操作的单行文字，评审者同时判断原话是否真的授权以及操作是否必要。纯只读任务可使用空允许列表。验收器自己的状态和报告写入不计入业务操作；不得借此排除业务输出或额外副作用。
 
@@ -46,7 +46,7 @@ scope.allowed_actions 记录业务文件写入、删除、命令执行、安装�
 
 ## 独立评审
 
-下面展示当前 v3 评审的完整字段。父代理提供原始要求和待交付答复，评审者只读返回 JSON，父代理原样保存 judgment.json。SHA256 由评审者实际读取文件计算；无法读到的 artifact 哈希为 null，相关结果为 unverified。哈希占位符不能直接用于实际验收。
+下面展示当前评审的完整字段。父代理提供原始要求和待交付答复，评审者只读返回 JSON，父代理原样保存 judgment.json。SHA256 由评审者实际读取文件计算；无法读到的 artifact 哈希为 null，相关结果为 unverified。哈希占位符不能直接用于实际验收。
 
 ```json
 {
@@ -115,4 +115,4 @@ scope.actions 由评审者依据实际差异、工具日志或 trace 列出实�
 
 ## 旧格式兼容边界
 
-旧分数计算已移除，结果不再输出 score 或 dimensions 数值。旧输入中的 dimensions 仅作为未使用的额外字段忽略；旧 v2 与未声明版本的记录仍可读取，但须补齐真实 v3 核查才能通过。`score` 命令和 `work-eval-score` 报告文件名保留调用兼容，执行的是当前逐项验收。实际验收遵循目标项目约定：代码核对真实链路，文档重开并对照模板，电脑操作观察终态，研究核对原始来源。
+旧分数计算已移除，结果不再输出 score 或 dimensions 数值。旧输入中的 dimensions 仅作为未使用的额外字段忽略；未声明版本或旧版本的记录仍可读取，但须补齐当前协议的全部核查才能通过。`score` 命令和 `work-eval-score` 报告文件名保留调用兼容，执行的是当前逐项验收。实际验收遵循目标项目约定：代码核对真实链路，文档重开并对照模板，电脑操作观察终态，研究核对原始来源。
