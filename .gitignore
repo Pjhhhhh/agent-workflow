@@ -10,6 +10,7 @@ graphify-out/
 .env
 .env.*
 !.env.example
+.qwen/
 
 # 本地发布准备清单不属于技能内容
 /release-files.txt
