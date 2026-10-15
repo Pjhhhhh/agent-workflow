@@ -61,6 +61,12 @@ npx skills add mattpocock/skills --skill writing-for-agents
 
 Graphify适合关系、路径与跨资料查询，Understand-Anything适合代码讲解、架构层次与业务导览；先复用已有且适合问题的图谱，有明确互补增益时再组合。Archify与diagram-design继续承担图示交付，各工具自有JSON不视为原生互转。精确用法读取当前有效技能，不在本工作流复制上游完整教程。
 
+## REA：发布产物与运行时取证
+
+只有结论依赖发布二进制、安装包、打包应用或反编译，或需要现有源码与验证入口无法提供的专门运行时证据时，才读取当前有效的`reverse-engineer-anything`；取证对象可包括用户指定应用或已有记录。普通源码分析、已有verify与常规故障日志沿用原入口，连续失败本身不触发REA。
+
+先明确对象及版本、待解问题和操作范围，按实际可用能力及原有权限取证。结果进入原任务验收，区分静态推断、记录内观察与当前动态实测。REA是可选能力，不作为安装依赖；缺失按本页通用规则处理，不默认运行health或setup。
+
 ## Open Code Review：模式选择
 
 OCR在这里指[Open Code Review](https://github.com/alibaba/open-code-review)。先按原请求确定必要审查范围，逐文件核对实际内容、OCR能力及限制。选用OCR时，必要范围内能处理的文件都要经过OCR，不因低风险、内容简单或省时跳过；用户明确的范围优先，不扩展到全仓或无关文件。
