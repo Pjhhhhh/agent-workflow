@@ -5286,14 +5286,14 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
           <text data-node-label="" x="123" y="114" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">原始要求</text>
         </g>
 
-        <g id="node-n1" data-node-id="n1" data-node-label="必要契约" tabindex="0" role="button" aria-label="聚焦必要契约，每次验收独立目录 · 允许操作, 主流程" aria-pressed="false" data-node-kind="backend" data-node-sublabel="每次验收独立目录 · 允许操作" data-node-context="主流程">
-          <title>必要契约 · 每次验收独立目录 · 允许操作 · 主流程</title>
+        <g id="node-n1" data-node-id="n1" data-node-label="任务要求" tabindex="0" role="button" aria-label="聚焦任务要求，每次验收独立目录 · 允许操作, 主流程" aria-pressed="false" data-node-kind="backend" data-node-sublabel="每次验收独立目录 · 允许操作" data-node-context="主流程">
+          <title>任务要求 · 每次验收独立目录 · 允许操作 · 主流程</title>
           <rect x="230" y="93" width="150" height="52" rx="8" class="c-mask"/>
           <rect x="230" y="93" width="150" height="52" rx="8" class="c-backend" data-animate="node" style="--step:1" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(236 99) scale(0.6875)">
             <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="305" y="114" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">必要契约</text>
+          <text data-node-label="" data-detail-anchor="" x="305" y="114" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">任务要求</text>
           <text data-detail="context" x="305" y="131" class="t-muted" font-size="8" text-anchor="middle">每次验收独立目录 · 允许操作</text>
         </g>
 
@@ -5330,15 +5330,15 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
           <text data-detail="context" x="851" y="131" class="t-muted" font-size="8" text-anchor="middle">版本、引用与操作</text>
         </g>
 
-        <g id="node-n5" data-node-id="n5" data-node-label="验收报告" tabindex="0" role="button" aria-label="聚焦验收报告，契约路径绑定 · 写入互斥, 主流程" aria-pressed="false" data-node-kind="backend" data-node-sublabel="契约路径绑定 · 写入互斥" data-node-context="主流程">
-          <title>验收报告 · 契约路径绑定 · 写入互斥 · 主流程</title>
+        <g id="node-n5" data-node-id="n5" data-node-label="验收报告" tabindex="0" role="button" aria-label="聚焦验收报告，输入路径绑定 · 写入互斥, 主流程" aria-pressed="false" data-node-kind="backend" data-node-sublabel="输入路径绑定 · 写入互斥" data-node-context="主流程">
+          <title>验收报告 · 输入路径绑定 · 写入互斥 · 主流程</title>
           <rect x="958" y="93" width="150" height="52" rx="8" class="c-mask"/>
           <rect x="958" y="93" width="150" height="52" rx="8" class="c-backend" data-animate="node" style="--step:5" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(964 99) scale(0.6875)">
             <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
           </g>
           <text data-node-label="" data-detail-anchor="" x="1033" y="114" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">验收报告</text>
-          <text data-detail="context" x="1033" y="131" class="t-muted" font-size="8" text-anchor="middle">契约路径绑定 · 写入互斥</text>
+          <text data-detail="context" x="1033" y="131" class="t-muted" font-size="8" text-anchor="middle">输入路径绑定 · 写入互斥</text>
         </g>
 
         <g id="node-repair" data-node-id="repair" data-node-label="缺口与动作" tabindex="0" role="button" aria-label="聚焦缺口与动作，遗漏、无依据或范围冲突, 失败反馈" aria-pressed="false" data-node-kind="security" data-node-sublabel="遗漏、无依据或范围冲突" data-node-context="失败反馈">
@@ -5591,11 +5591,11 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
       <div class="card">
         <div class="card-header">
           <div class="card-dot amber"></div>
-          <h3>记录保护的实际边界</h3>
+          <h3>报告写入与恢复</h3>
         </div>
         <ul>
-          <li>拒绝不同契约覆盖和忙目录写入；不再算总分。</li>
-          <li>强杀可留锁；报告非崩溃事务；语义仍需独立复核。</li>
+          <li>报告与输入路径绑定，写入目录采用互斥保护。</li>
+          <li>中断后核对写入锁及 JSON、Markdown 两份报告。</li>
         </ul>
       </div>
     </div>

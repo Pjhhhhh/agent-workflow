@@ -4,7 +4,8 @@
   "meta": {
     "title": "持续改进 · 真实任务检验",
     "locale": "zh-CN",
-    "quality_profile": "showcase"
+    "quality_profile": "showcase",
+    "output": "docs/diagrams/03-improvement.html"
   },
   "lanes": [
     {
@@ -81,7 +82,7 @@
       "col": 3,
       "type": "security",
       "label": "修正假设",
-      "sublabel": "不重复无效尝试",
+      "sublabel": "按新证据调整方法",
       "width": 170
     },
     {
@@ -144,16 +145,16 @@
       "dot": "cyan",
       "title": "已观察的工程结果",
       "items": [
-        "规则加载与本地协议已有实际验证记录。",
-        "图文和脚本修复不等于模型可靠性已提升。"
+        "规则加载与本地协议已有实际验证记录。"
       ]
     },
     {
       "dot": "amber",
       "title": "尚待验证",
       "items": [
-        "真实模型对照尚未运行，不给成功率承诺。",
-        "正式保留集单独检验，不用它反复挑选规则。"
+        "T01–T03 模型对照尚未运行。",
+        "对照时保持要求、输入和运行条件一致。",
+        "扩大任务集后，用未参与规则选择的独立保留集检验一次。"
       ]
     }
   ]

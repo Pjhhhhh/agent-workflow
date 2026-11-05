@@ -4,7 +4,8 @@
   "meta": {
     "title": "局部实验 · Stop 覆盖范围",
     "locale": "zh-CN",
-    "quality_profile": "showcase"
+    "quality_profile": "showcase",
+    "output": "docs/diagrams/04-stop-boundary.html"
   },
   "lanes": [
     {
@@ -142,18 +143,18 @@
   "cards": [
     {
       "dot": "cyan",
-      "title": "可选实验，不是日常前置",
+      "title": "登记与退出",
       "items": [
-        "仅匹配已登记任务；项目外、未登记或错轮跳过。",
-        "release 保留未完成；空响应不等于任务通过。"
+        "只处理同项目、同会话、同轮次匹配的已登记任务。",
+        "release 保存未完成原因；空对象须结合登记状态和报告判断。"
       ]
     },
     {
       "dot": "amber",
-      "title": "全局自动接入尚未验证",
+      "title": "Stop 响应",
       "items": [
         "最多请求继续一次，是否执行由宿主决定。",
-        "没有安装全局钩子；次数用尽仍须保留未完成。"
+        "续跑次数用尽时，保留未完成状态和必要缺口。"
       ]
     }
   ]
