@@ -1,7 +1,9 @@
 <!-- @author Pjh -->
 # 第三方许可
 
-`docs/diagrams/*.html` 使用 Archify 2.17 生成并包含其交互查看器。以下保留上游 MIT 声明；项目内容使用根目录 MIT 许可。
+`docs/diagrams/01-workflow.html` 与 `05-local-evaluation.html` 使用 Archify 3.2.0 生成，其内嵌运行时与模板采用 Apache License 2.0；完整许可及上游 NOTICE 随 HTML 保留。两页的流程内容由本项目编写。
+
+`03-improvement.html` 与 `04-stop-boundary.html` 保留 Archify 2.17 生成版本及其交互查看器。以下保留该版本的上游 MIT 声明；项目内容使用根目录 MIT 许可。
 
 ```text
 MIT License

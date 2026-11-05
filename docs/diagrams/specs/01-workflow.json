@@ -2,9 +2,11 @@
   "schema_version": 2,
   "diagram_type": "workflow",
   "meta": {
-    "title": "通用工作流程 · 按任务验收",
+    "title": "通用工作流程 · 2026-10-14 历史示意",
     "locale": "zh-CN",
-    "quality_profile": "showcase"
+    "quality_profile": "showcase",
+    "subtitle": "本页保留当时的流程快照。当前执行要求见仓库 skills/work-eval/SKILL.md；图集入口 index.html 提供链接。",
+    "output": "docs/diagrams/01-workflow.html"
   },
   "lanes": [
     {
