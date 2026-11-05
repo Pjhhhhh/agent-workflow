@@ -1,7 +1,6 @@
-"""把独立评审与实际工件绑定，必要失败项不由平均分放行。@author Pjh"""
+# @author Pjh：显式检查已提交记录、当前正文与声明操作，不替代实际验收。
 
 import argparse
-import hashlib
 import json
 import os
 import re
@@ -56,15 +55,6 @@ def load(path: PathLike) -> dict[str, Any]:
     return parse_object(Path(path).read_bytes())
 
 
-def digest(path: PathLike) -> str:
-    """按块计算当前文件哈希，不把大工件内容打印到日志。@author Pjh"""
-    h = hashlib.sha256()
-    with Path(path).open("rb") as stream:
-        for block in iter(lambda: stream.read(1024 * 1024), b""):
-            h.update(block)
-    return h.hexdigest()
-
-
 def write_json(path: PathLike, value: dict[str, Any]) -> None:
     """原子替换单份状态，避免Stop读到半写入的JSON。@author Pjh"""
     path = Path(path)
@@ -74,7 +64,7 @@ def write_json(path: PathLike, value: dict[str, Any]) -> None:
     temporary.replace(path)
 
 
-def contract_data(path: PathLike) -> tuple[dict[str, Any], str]:
+def contract_data(path: PathLike) -> dict[str, Any]:
     """逐项验收以契约为准；遗漏或重复要求都不应默默放行。@author Pjh"""
     raw = Path(path).read_bytes()
     data = parse_object(raw)
@@ -105,9 +95,9 @@ def contract_data(path: PathLike) -> tuple[dict[str, Any], str]:
     if data.get("request_artifact") not in artifacts:
         raise ValueError("request_artifact必须引用已声明的原始要求文件")
     version = data.get("schema_version", 2)
-    if type(version) is not int or version not in {2, 3}:
-        raise ValueError("schema_version须为2或3")
-    if version == 3:
+    if type(version) is not int or version not in {2, 3, 4}:
+        raise ValueError("schema_version须为2、3或4")
+    if version >= 3:
         if set(ids) & RESERVED_ACTION_IDS:
             raise ValueError("criterion id不能占用系统核查动作ID")
         scope = data.get("scope")
@@ -121,28 +111,20 @@ def contract_data(path: PathLike) -> tuple[dict[str, Any], str]:
                 raise ValueError("允许操作须引用原要求的单行request_quote")
         if len(keys) != len(set(keys)):
             raise ValueError("允许操作重复")
-    return data, hashlib.sha256(raw).hexdigest()
+    return data
 
 
 def evaluate(contract: PathLike, judgment: PathLike) -> dict[str, Any]:
     """状态由必要结果及证据决定，必要条件、证据和独立性另行判定。@author Pjh"""
     contract, judgment = Path(contract).resolve(), Path(judgment).resolve()
-    c, contract_hash = contract_data(contract)
-    judgment_raw = judgment.read_bytes()
-    j = parse_object(judgment_raw)
-    judgment_hash = hashlib.sha256(judgment_raw).hexdigest()
-    hashes = {p: digest(p) if Path(p).is_file() else None for p in c["artifacts"]}
-    allowed = set(hashes)
-    reviewed_hashes = j.get("artifact_hashes")
-    if not isinstance(reviewed_hashes, dict) or set(reviewed_hashes) != allowed:
-        raise ValueError("评审者必须记录全部工件的当时哈希")
-    reviewed_contract = j.get("contract_sha256")
-    if not isinstance(reviewed_contract, str) or not re.fullmatch(r"[0-9a-f]{64}", reviewed_contract):
-        raise ValueError("评审者必须记录评审时的契约SHA256")
+    c = contract_data(contract)
+    j = load(judgment)
+    files = {p: Path(p).is_file() for p in c["artifacts"]}
+    allowed = set(files)
 
     def non_request_file(path: str) -> bool:
         """按实际文件身份排除原请求，路径别名和软硬链接也不能冒充终态证据。@author Pjh"""
-        if hashes[path] is None or hashes[c["request_artifact"]] is None:
+        if not files[path] or not files[c["request_artifact"]]:
             return False
         try:
             return not Path(path).samefile(c["request_artifact"])
@@ -154,7 +136,7 @@ def evaluate(contract: PathLike, judgment: PathLike) -> dict[str, Any]:
         if not isinstance(paths, list) or any(not isinstance(p, str) or p not in allowed for p in paths):
             raise ValueError("证据必须引用契约已声明的工件")
         # 原要求只说明用户要什么，不能单独证明已经做成或核对过实际操作。
-        return (any(non_request_file(p) for p in paths) or not require) and all(hashes[p] is not None for p in paths)
+        return (any(non_request_file(p) for p in paths) or not require) and all(files[p] for p in paths)
 
     def reason(item: dict[str, Any]) -> None:
         if not isinstance(item.get("reason"), str) or not item["reason"].strip():
@@ -167,7 +149,6 @@ def evaluate(contract: PathLike, judgment: PathLike) -> dict[str, Any]:
     if len(ids) != len(set(ids)) or set(ids) != {x["id"] for x in c["criteria"]}:
         raise ValueError("评审遗漏、重复或新增了验收项")
     failures, unknown = [], []
-    binding_needed = False
     coverage = j.get("coverage")
     if not isinstance(coverage, dict) or coverage.get("status") not in {"pass", "fail", "unverified"}:
         raise ValueError("必须单独核对原要求覆盖coverage")
@@ -194,15 +175,6 @@ def evaluate(contract: PathLike, judgment: PathLike) -> dict[str, Any]:
             failures.append("原要求覆盖: " + coverage["reason"] + "；" + "；".join(missing))
         else:
             unknown.append("原要求覆盖尚未核实")
-    if reviewed_contract != contract_hash or digest(contract) != contract_hash:
-        unknown.append("验收目标或要求已不同于评审者检查的契约")
-        binding_needed = True
-    if reviewed_hashes != hashes:
-        unknown.append("工件已不同于评审者检查的版本")
-        binding_needed = True
-    if digest(judgment) != judgment_hash:
-        unknown.append("评审文件在读取期间已变化")
-        binding_needed = True
     required = {x["id"] for x in c["criteria"] if x["required"]}
     for item in items:
         reason(item)
@@ -235,7 +207,7 @@ def evaluate(contract: PathLike, judgment: PathLike) -> dict[str, Any]:
     elif not evidence(integrity, require=True):
         unknown.append("真实性/权限缺少实际核查证据")
         next_action("integrity", "读取实际差异和工具日志，补齐真实性及授权核查证据后重评")
-    if c.get("schema_version", 2) != 3:
+    if c.get("schema_version", 2) < 3:
         unknown.append("旧协议未启用关键主张与操作范围核查")
         next_action("protocol", "补齐关键主张来源、允许操作及实际操作核查后重评")
     else:
@@ -294,11 +266,9 @@ def evaluate(contract: PathLike, judgment: PathLike) -> dict[str, Any]:
             if action_key(item) not in permitted:
                 failures.append("未授权操作: " + item["operation"] + " " + item["target"])
                 next_action("scope", "停止未授权操作，核对实际影响并在现有授权内修复；额外需求单独交用户决定")
-    if any(h is None for h in hashes.values()):
+    if not all(files.values()):
         unknown.append("声明的工件不存在或不是文件")
-        binding_needed = True
-    if binding_needed:
-        next_action("binding", "核对原要求、当前工件和版本缺口，读取实际对象后重新评审")
+        next_action("binding", "读取实际对象，补齐缺失文件并重新核对受影响结果")
     reviewer = j.get("reviewer", {})
     if not isinstance(reviewer, dict) or reviewer.get("kind") not in {"independent", "self"} or not isinstance(reviewer.get("id"), str) or not reviewer["id"].strip():
         raise ValueError("必须记录评审者kind和id")
@@ -306,12 +276,11 @@ def evaluate(contract: PathLike, judgment: PathLike) -> dict[str, Any]:
     status = "fail" if failures else "partial" if unknown else "provisional" if reviewer["kind"] == "self" else "pass"
     if reviewer["kind"] == "self" and "protocol" not in action_ids:
         actions.append({"id": "protocol", "action": "独立评审未完成；保留自检与阻碍记录，可用后读取当前工件，在新验收目录补做独立评审"})
-    return {"schema_version": 3, "contract_path": str(Path(contract).resolve()), "task_id": c["task_id"], "goal": c["goal"], "task_type": c["task_type"],
+    return {"schema_version": 4, "contract_path": str(Path(contract).resolve()), "task_id": c["task_id"], "goal": c["goal"], "task_type": c["task_type"],
             "status": status, "required_failures": failures,
             "coverage": coverage, "integrity": integrity, "claims": j.get("claims", []), "scope": j.get("scope"), "next_actions": actions,
             "unverified": unknown, "criteria": items, "reviewer": reviewer,
-            "artifact_hashes": hashes, "contract_sha256": contract_hash, "judgment_sha256": judgment_hash,
-            "judgment_path": str(judgment), "verification_scope": "结构、版本、正文引文及已声明操作匹配；语义支持和记录完整性仍需独立阅读，身份标签不是认证"}
+            "judgment_path": str(judgment), "verification_scope": "仅检查已提交记录、当前文件存在、正文引文及声明操作；不核验审阅前后字节一致，不读取旧记录摘要。语义、记录完整性及实际完成仍须直接核对，身份标签不是认证"}
 
 
 def score(contract: PathLike, judgment: PathLike) -> dict[str, Any]:
@@ -338,7 +307,7 @@ def save_score(contract: PathLike, judgment: PathLike) -> dict[str, Any]:
     path = Path(contract).resolve().parent
     write_json(path / "work-eval-score.json", report)
     lines = ["<!-- @author Pjh -->", "# 逐项工作验收", "", "任务：" + report["goal"],
-             "", "结果：**" + report["status"] + "**。完成由必要要求及其证据决定。",
+             "", "记录检查：**" + report["status"] + "**。此状态只对应已提交记录及当前可读取正文。",
              "", ("评审状态：**独立评审未完成**。以下为作者自检，必要项自检通过不代表整体验收完成。"
                     if report["reviewer"]["kind"] == "self" else "评审状态：已提供独立评审记录；身份标签本身不构成认证。"),
              "", "| 验收项 | 状态 | 判断依据 |", "| --- | --- | --- |"]
@@ -354,7 +323,7 @@ def save_score(contract: PathLike, judgment: PathLike) -> dict[str, Any]:
     lines += ["", "操作范围核查：", scope["status"] + "；" + scope["reason"] if scope else "旧格式没有范围核查。"]
     if scope:
         lines += ["- " + x["operation"] + "：" + x["target"] for x in scope["actions"]]
-    lines += ["", "下一动作："] + (["- " + x["id"] + ": " + x["action"] for x in report["next_actions"]] or ["无评审者记录的内容缺口；版本变化需重新读取工件并重评。"])
+    lines += ["", "下一动作："] + (["- " + x["id"] + ": " + x["action"] for x in report["next_actions"]] or ["当前记录未列出内容缺口；已知后续修改需核对受影响项。"])
     lines += ["", "评审者：" + report["reviewer"]["id"], "", report["verification_scope"],
               "", "证据及理由详见同目录work-eval-score.json；文件变化后重新核验。"]
     (path / "work-eval-score.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
@@ -398,7 +367,7 @@ def hook(event: dict[str, Any]) -> dict[str, Any]:
         if prompt_state.get("session_id") != session or prompt_state.get("turn_id") != turn or prompt_state.get("release"):
             return {}
         return {"hookSpecificOutput": {"hookEventName": name, "additionalContext":
-                "实质代码/文档/电脑操作/研究交付使用work-eval：执行前登记用户验收，交付前独立评审并运行评分脚本。简短问答、状态、确认可跳过。"
+                "当前是明确登记的work-eval局部实验，仅检查已提交记录与可读取正文；按完整职责、当前用途、已有授权和实际结果执行。"
                 + "当前评分session=" + str(session) + "，turn=" + str(turn) + "，启动cwd=" + str(cwd)
                 + "。Stop只检查已登记任务；失败仍可推进则继续，真实阻碍/用户停止/硬预算保存未完成退出。"}}
     if name != "Stop" or not isinstance(turn, str) or not cwd:
@@ -416,10 +385,8 @@ def hook(event: dict[str, Any]) -> dict[str, Any]:
         report_path = Path(state["contract"]).parent / "work-eval-score.json"
         report = load(report_path)
         expected = evaluate(state["contract"], report["judgment_path"])
-        if expected["contract_sha256"] != state.get("contract_sha256"):
-            problem = "登记后的验收契约已变化，需要核对最新授权并重新登记"
-        elif report != expected:
-            problem = "评分或工件已变化，需要重评"
+        if report != expected:
+            problem = "已保存报告与当前记录检查结果不同，需要核对受影响内容"
         elif report["status"] != "pass":
             problem = "评分状态为" + report["status"] + "，必要条件未全部通过"
     except (OSError, ValueError, KeyError, TypeError) as exc:
@@ -461,7 +428,7 @@ def main() -> int:
                 raise ValueError("hook输入必须是JSON对象")
             result = hook(event)
         elif args.action == "arm":
-            _, contract_hash = contract_data(args.contract)
+            contract_data(args.contract)
             if not args.turn.strip():
                 raise ValueError("turn不能为空")
             path = state_path(args.cwd, args.session)
@@ -469,7 +436,7 @@ def main() -> int:
             same_turn = previous.get("session_id") == args.session and previous.get("turn_id") == args.turn
             continuations = previous.get("continuations", 0) if same_turn else 0
             write_json(path, {"session_id": args.session, "turn_id": args.turn,
-                       "contract": str(args.contract.resolve()), "contract_sha256": contract_hash,
+                       "contract": str(args.contract.resolve()),
                        "continuations": continuations})
             result = {"armed": True, "session": args.session, "turn": args.turn}
         elif args.action == "release":

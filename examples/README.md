@@ -1,13 +1,13 @@
 <!-- @author Pjh -->
 # 可运行的协议示例
 
-在完整仓库根执行 `python3 examples/run_demo.py`。输出目录位于启动目录 `.codex/verification/demo-时间/`；每次独立生成，不覆盖之前记录。无第三方库、网络、模型调用或客户端配置修改。
+在完整仓库根目录执行 `python3 examples/run_demo.py`。程序使用 Python 标准库，在启动目录的 `.codex/verification/demo-时间/` 下保存每次运行结果。
 
 示例依次生成两个独立运行目录：
 
-1. `self`：合成文件已写入，合成自检引用文件和真实哈希。验收命令退出1，状态 provisional，因为没有独立评审。
-2. `changed`：记录评审哈希后改动对应合成文件。验收命令退出1，状态 partial，因为证据版本已失效。
+1. `self`：写入合成文件并使用 schema 4 自检记录，预期 CLI 退出码为 1，状态为 provisional。
+2. `changed`：替换合成文件正文，使已声明主张的引文消失，预期 CLI 退出码为 1，状态为 partial。
 
-示例程序确认这两个预期状态后自身退出0。请区分“示例按预期运行”与“业务验收通过”；它不会伪造真实独立评审来生成 pass。要复现某次原始结果，读取该目录的 invocation.json 中精确命令。公开协议回放还包含独立标签的合成输入，那也只是测试数据。
+示例程序确认这两个预期状态后，自身以退出码 0 结束。复现某次结果时，使用该目录 `invocation.json` 中的精确命令。示例与协议回放均使用合成输入，其中的评审身份标签属于测试数据。
 
-真实任务须使用真实用户原话、交付物、来源和独立评审。输入字段见[协议](../skills/work-eval/references/rubric.md)，示例中的内容不能直接用于真实任务验收。
+准备真实任务的 CLI 输入时，按[输入协议](../skills/work-eval/references/record-checking-protocol.md)填写实际要求、工件、来源及评审结果。

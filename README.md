@@ -1,101 +1,43 @@
 <!-- @author Pjh -->
 # agent-workflow
 
-让 AI 代理围绕用户要求完成工作，并用实际结果验收。适用于代码开发、文档填写、电脑操作和资料研究。
+按任务选择两个独立技能，让 AI 代理完成工作并核对实际结果。
 
-核心技能是 **work-eval**：简单任务直接核验；复杂任务固定必要要求、独立评审、逐项检查，发现可修的缺口就回到执行。图集按需查看，不是使用前提。
+| 技能 | 用途 |
+| --- | --- |
+| [work-eval](skills/work-eval/SKILL.md) | 组织代码、文档、电脑操作和资料研究任务的执行、核验与恢复 |
+| [doc-maintenance](skills/doc-maintenance/SKILL.md) | 处理文档任务，按读者用途编写、核对与整理内容 |
 
-## 安装
+## 开始使用
 
-使用支持 Agent Skills 的安装器，选择目标客户端与安装范围：
+使用支持 Agent Skills 的客户端，按需安装对应技能。安装器需要 Node.js 22.20+；默认安装到当前项目，在命令末尾加 `-g` 可安装到用户级目录。
+
+安装工作流：
 
 ```sh
 npx skills add Pjhhhhh/agent-workflow --skill work-eval
 ```
 
-也可以把 `skills/work-eval` 整个目录复制到客户端的技能目录。技能包含自己的脚本和参考资料，不依赖仓库外层文档。脚本需要 Python 3.9+，只使用标准库；安装器需要 Node.js，手动复制不需要。
-
-## 使用
-
-在支持 Agent Skills 的 AI 代理或客户端中，按宿主的技能调用方式使用 work-eval，或要求代理读取已安装技能：
-
-> 使用 work-eval 完成这项任务，核对原始要求和最终工件；有可修的验收缺口就继续，完成后给出结果与验证证据。
-
-希望成为默认工作方式时，把下面这段合并到自己的代理规则中，保留原有项目与权限约定：
-
-> 处理代码、文档、电脑操作和资料研究时，读取 work-eval 技能并按其分支执行。纯问答直接回答，简单任务直接核验，复杂任务独立评审并逐项验收。记录留在实际工作区，遵守目标项目的权限和测试约定。
-
-安装不会自动修改 AGENTS.md、接入全局hooks或授予额外操作权限。技能发现、调用方式和独立评审能力以宿主实际支持为准。详细步骤、源码链接安装和重启要求见[安装与更新](docs/安装与更新.md)。
-
-## 按需搭配其他技能、插件与 OCR
-
-使用者可以选择自己的技能、插件或CLI；用户指定、项目要求或当前任务确需时才接入，不改变work-eval的默认分流与验收。未安装可选工具时继续使用已有方法；已明确列为必要项的缺口仍须记录。选择原则与OCR用法集中在[可选接入说明](skills/work-eval/references/optional-integrations.md)，它随整个技能目录一起复制即可使用。
-
-编写代理规则或技能时，`writing-for-agents` 的选用、来源、安装与缺失处理见[代理文档写作分支](skills/work-eval/references/optional-integrations.md#writing-for-agents代理文档写作)。
-
-已有`ocr`CLI时，可以直接提出：
-
-> 用OCR委派模式审查这次改动。
-
-代理先确定必要审查范围，其中能被OCR处理的文件都要经过OCR，再按变更或当前内容选择委派或全文件模式；有Git也可审查范围内文件的当前内容。具体用法、过滤项处理与完成证据要求见可选接入说明；无需额外安装官方插件。OCR材料不直接成为独立验收结论，其他插件也按各自说明与当前授权选择。
-
-## 按需搭配 Matt Pocock
-
-`work-eval` 负责执行范围和结果验收；[Matt Pocock Skills](https://github.com/mattpocock/skills) 可用于工程任务中的诊断、拆分、实施和代码审查。代理按任务读取适用的已安装技能，不要求每次走完一套阶段。
-
-首次使用时，可以按需安装下面这些技能，并在安装器中选择客户端与安装范围；已经安装的直接复用：
+安装文档编写与处理技能：
 
 ```sh
-npx skills@latest add mattpocock/skills --skill setup-matt-pocock-skills diagnosing-bugs to-tickets code-review ask-matt
+npx skills add Pjhhhhh/agent-workflow --skill doc-maintenance
 ```
 
-示例不包含 `implement`，避免覆盖已有的自管版本。若另选上游 `implement`，其测试和提交步骤仍须遵守目标项目的有效约定与用户授权。首次项目配置、按任务选择和本地版本保护见[安装说明](docs/安装与更新.md#可选matt-pocock工程技能)与[接入规则](skills/work-eval/references/matt-pocock.md)。
+安装后在宿主中调用对应技能。完整目录复制、源码链接和安装确认见[安装与更新](docs/安装与更新.md)；文档任务的具体入口见[安装 doc-maintenance](docs/安装与更新.md#安装-doc-maintenance)。
 
-## 按需搭配绘图与代码关系工具
+## 文档任务
 
-| 工具 | 适用任务 | 来源 |
-| --- | --- | --- |
-| Archify | 架构、流程、时序、数据流与状态图，生成可交互HTML | [官方仓库](https://github.com/tt-a1i/archify) |
-| diagram-design | 更多图型、版式和已有图源导入，生成HTML/SVG等图示 | [官方仓库](https://github.com/cathrynlavery/diagram-design) |
-| Graphify | 查代码、文档的静态关系及潜在影响，生成可查询知识图谱 | [官方仓库](https://github.com/Graphify-Labs/graphify) |
-| Understand-Anything | 开发、运维查看、排障、评审与交接中的系统理解，查询架构层次、依赖链路和业务流程 | [官方仓库](https://github.com/Egonex-AI/Understand-Anything) |
+文档任务使用 `doc-maintenance`，并按宿主或项目规则读取用户已配置的文档规范；规范不随技能安装。局部编写与处理核对目标内容，集中整理再检查跨页阅读路径。
 
-阅读已有图集不要求安装生成工具。选用与协作按[共享技能规则](skills/work-eval/SKILL.md#工具选用与协作)，图集不替代实际结果验收。Archify、diagram-design与Graphify的安装命令见[安装说明](docs/安装与更新.md#可选绘图与代码关系工具)。
+## 按问题查阅
 
-Understand-Anything的按需入口、图谱复用和验证边界见[接入说明](skills/work-eval/references/optional-integrations.md#understand-anything系统理解)。
-
-## 技能内容
-
-| 文件 | 作用 |
+| 要做什么 | 阅读入口 |
 | --- | --- |
-| [SKILL.md](skills/work-eval/SKILL.md) | 执行分流、验证、回修与交付 |
-| [rubric.md](skills/work-eval/references/rubric.md) | 契约和评审输入格式 |
-| [safety.md](skills/work-eval/references/safety.md) | 来源、范围、模板格式和恢复核查 |
-| [features.md](skills/work-eval/references/features.md) | CLI入口与记录行为 |
-| [work_eval.py](skills/work-eval/scripts/work_eval.py) | 确定性的记录、引文、版本和声明操作检查 |
-
-验收结果为 `pass`、`fail`、`partial` 或 `provisional`；不使用旧的维度总分。自检不会变成独立通过，工件变化后旧判断不能直接沿用。
-
-## 示例与验证
-
-下载完整仓库后，在根目录运行：
-
-```sh
-python3 examples/run_demo.py
-python3 scripts/verify_protocol.py
-```
-
-[合成示例](examples/README.md)展示自检与版本失效，协议回放包括单独安装技能后的运行和门禁隔离。记录保存在启动工作区，目录约定见[共享技能](skills/work-eval/SKILL.md#区分技能位置与任务位置)。当前项数、版本与验证边界见[验证摘要](docs/验证摘要.md)。
-
-当前为实验版。独立评审仍可能漏项，脚本不能证明来源支持结论、操作记录完整或评审身份真实。没有通用业务执行器、跨轮自动恢复器或全局强制门禁；模型完成率和成本改善尚未进行对照验证。
-
-## 文档
-
-- [工作流程](docs/工作流程.md) · [流程图集](docs/diagrams/index.html)
-- [已知问题](docs/问题与失败清单.md) · [真实任务检验](docs/真实任务检验.md)
-- [维护说明](docs/维护说明.md) · [参考与取舍](docs/流程参考与取舍.md)
-
-仓库结构参考 [Matt Pocock Skills](https://github.com/mattpocock/skills) 与 [Anthropic Skills](https://github.com/anthropics/skills)：README提供入口，技能目录自包含，额外说明按需阅读。本项目只有一个核心技能，不引入无关插件或多包框架。
+| 安装、更新、确认生效或退出 | [安装与更新](docs/安装与更新.md) |
+| 了解任务执行、验证与恢复 | [工作流程](docs/工作流程.md) |
+| 查项目说明、工具、验证与研究材料 | [文档导航](docs/README.md) |
+|                  |                        |
 
 ## 许可
 
