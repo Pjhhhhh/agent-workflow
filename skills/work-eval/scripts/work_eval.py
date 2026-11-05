@@ -1,4 +1,4 @@
-# @author Pjh：显式检查已提交记录、当前正文与声明操作，不替代实际验收。
+# @author Pjh：检查已提交记录、当前正文与声明操作。
 
 import argparse
 import json
@@ -16,19 +16,19 @@ RESERVED_ACTION_IDS = {"coverage", "integrity", "scope", "binding", "protocol"}
 
 
 def action_key(item: dict[str, Any]) -> tuple[str, str]:
-    """逐项匹配操作和精确目标，避免把笼统任务当作额外写入或发布权限。@author Pjh"""
+    """根据操作类型和规范化目标检查授权项。@author Pjh"""
     if not isinstance(item, dict) or item.get("operation") not in {"write", "delete", "execute", "install", "send", "publish"}:
         raise ValueError("操作须为write/delete/execute/install/send/publish")
     target = item.get("target")
     if not isinstance(target, str) or not target.strip():
         raise ValueError("操作target不能为空")
     if item["operation"] in {"write", "delete"} and (not Path(target).is_absolute() or str(Path(target).resolve()) != target):
-        raise ValueError("文件操作target须为规范化绝对路径，不支持通配或别名")
+        raise ValueError("文件操作target须为精确的规范化绝对路径")
     return item["operation"], target
 
 
 def quote_matches(path: PathLike, quote: str, line: int = 0) -> bool:
-    """按行读UTF-8正文核对片段；只证明文字存在，不证明它支持主张。@author Pjh"""
+    """在指定UTF-8行中查找引文。@author Pjh"""
     try:
         with Path(path).open(encoding="utf-8") as stream:
             for number, content in enumerate(stream, 1):
@@ -42,7 +42,7 @@ def quote_matches(path: PathLike, quote: str, line: int = 0) -> bool:
 
 
 def parse_object(raw: bytes) -> dict[str, Any]:
-    """读取对象并拒绝JSON非有限数值，避免伪造分数绕过检查。@author Pjh"""
+    """读取JSON对象，拒绝非有限数值。@author Pjh"""
     def reject(value: str) -> None:
         raise ValueError("JSON不接受非有限数值: " + value)
     data = json.loads(raw.decode("utf-8"), parse_constant=reject)
@@ -65,7 +65,7 @@ def write_json(path: PathLike, value: dict[str, Any]) -> None:
 
 
 def contract_data(path: PathLike) -> dict[str, Any]:
-    """逐项验收以契约为准；遗漏或重复要求都不应默默放行。@author Pjh"""
+    """核对任务要求、必要项和允许操作的输入结构。@author Pjh"""
     raw = Path(path).read_bytes()
     data = parse_object(raw)
     if data.get("task_type") not in {"code", "document", "computer", "research", "mixed"}:
@@ -123,7 +123,7 @@ def evaluate(contract: PathLike, judgment: PathLike) -> dict[str, Any]:
     allowed = set(files)
 
     def non_request_file(path: str) -> bool:
-        """按实际文件身份排除原请求，路径别名和软硬链接也不能冒充终态证据。@author Pjh"""
+        """按文件身份排除原请求及指向同一文件的路径和链接。@author Pjh"""
         if not files[path] or not files[c["request_artifact"]]:
             return False
         try:
@@ -134,8 +134,8 @@ def evaluate(contract: PathLike, judgment: PathLike) -> dict[str, Any]:
     def evidence(item: dict[str, Any], require: bool = False) -> bool:
         paths = item.get("evidence", [])
         if not isinstance(paths, list) or any(not isinstance(p, str) or p not in allowed for p in paths):
-            raise ValueError("证据必须引用契约已声明的工件")
-        # 原要求只说明用户要什么，不能单独证明已经做成或核对过实际操作。
+            raise ValueError("证据必须引用任务要求文件已声明的工件")
+        # 完成证据采用独立于原要求的实际结果。
         return (any(non_request_file(p) for p in paths) or not require) and all(files[p] for p in paths)
 
     def reason(item: dict[str, Any]) -> None:
@@ -164,7 +164,7 @@ def evaluate(contract: PathLike, judgment: PathLike) -> dict[str, Any]:
     action_ids = {x["id"] for x in actions}
 
     def next_action(identifier: str, action: str) -> None:
-        """机器发现具体缺口时保留对应动作，不自动执行输入中的建议。@author Pjh"""
+        """按缺口ID补充恢复动作，并保留原判断。@author Pjh"""
         if identifier not in action_ids:
             actions.append({"id": identifier, "action": action})
             action_ids.add(identifier)
@@ -183,7 +183,7 @@ def evaluate(contract: PathLike, judgment: PathLike) -> dict[str, Any]:
         supported = evidence(item, require=item["status"] == "pass")
         if item["status"] == "pass" and not supported:
             item["status"] = "unverified"
-            item["reason"] += "；所引证据缺失，未确认通过"
+            item["reason"] += "；所引证据缺失"
             if item["id"] not in action_ids:
                 actions.append({"id": item["id"], "action": "补齐该项实际证据后重新评审"})
                 action_ids.add(item["id"])
@@ -213,7 +213,7 @@ def evaluate(contract: PathLike, judgment: PathLike) -> dict[str, Any]:
     else:
         claims = j.get("claims")
         if not isinstance(claims, list) or not claims:
-            raise ValueError("须逐条记录关键claims，不能用空清单跳过")
+            raise ValueError("claims须逐条列出关键主张")
         claim_ids = set()
         reserved = RESERVED_ACTION_IDS | set(ids)
         for item in claims:
@@ -272,19 +272,19 @@ def evaluate(contract: PathLike, judgment: PathLike) -> dict[str, Any]:
     reviewer = j.get("reviewer", {})
     if not isinstance(reviewer, dict) or reviewer.get("kind") not in {"independent", "self"} or not isinstance(reviewer.get("id"), str) or not reviewer["id"].strip():
         raise ValueError("必须记录评审者kind和id")
-    # 单独显示否决结果，不把主观平均分当成验收事实。
+    # 必要失败、证据缺口和评审类型依次决定状态。
     status = "fail" if failures else "partial" if unknown else "provisional" if reviewer["kind"] == "self" else "pass"
     if reviewer["kind"] == "self" and "protocol" not in action_ids:
-        actions.append({"id": "protocol", "action": "独立评审未完成；保留自检与阻碍记录，可用后读取当前工件，在新验收目录补做独立评审"})
+        actions.append({"id": "protocol", "action": "读取当前文件，在独立运行目录补做独立评审"})
     return {"schema_version": 4, "contract_path": str(Path(contract).resolve()), "task_id": c["task_id"], "goal": c["goal"], "task_type": c["task_type"],
             "status": status, "required_failures": failures,
             "coverage": coverage, "integrity": integrity, "claims": j.get("claims", []), "scope": j.get("scope"), "next_actions": actions,
             "unverified": unknown, "criteria": items, "reviewer": reviewer,
-            "judgment_path": str(judgment), "verification_scope": "仅检查已提交记录、当前文件存在、正文引文及声明操作；不核验审阅前后字节一致，不读取旧记录摘要。语义、记录完整性及实际完成仍须直接核对，身份标签不是认证"}
+            "judgment_path": str(judgment), "verification_scope": "检查对象：任务与评审记录、当前文件、正文引文和声明操作。"}
 
 
 def score(contract: PathLike, judgment: PathLike) -> dict[str, Any]:
-    """一个目录只允许同一契约顺序写报告，避免其他任务或并发进程混写证据。@author Pjh"""
+    """同一输入文件在独占目录内顺序写入报告。@author Pjh"""
     contract = Path(contract).resolve()
     lock = contract.parent / ".work-eval-write.lock"
     try:
@@ -294,44 +294,44 @@ def score(contract: PathLike, judgment: PathLike) -> dict[str, Any]:
     try:
         previous = contract.parent / "work-eval-score.json"
         if previous.exists() and load(previous).get("contract_path") != str(contract):
-            raise ValueError("已有报告属于另一契约或旧格式无法确认归属；请在独立运行目录重新验收")
+            raise ValueError("已有报告属于其他输入或归属未确认；请使用独立运行目录")
         return save_score(contract, judgment)
     finally:
-        # 仅释放本次成功取得的空锁目录，不接管其他运行的锁。
+        # 成功取得的空锁由本次运行释放。
         lock.rmdir()
 
 
 def save_score(contract: PathLike, judgment: PathLike) -> dict[str, Any]:
-    """保存机器汇总与可读报告，失败也留证据而非只打印一个分数。@author Pjh"""
+    """保存JSON检查结果与Markdown报告。@author Pjh"""
     report = evaluate(contract, judgment)
     path = Path(contract).resolve().parent
     write_json(path / "work-eval-score.json", report)
     lines = ["<!-- @author Pjh -->", "# 逐项工作验收", "", "任务：" + report["goal"],
-             "", "记录检查：**" + report["status"] + "**。此状态只对应已提交记录及当前可读取正文。",
-             "", ("评审状态：**独立评审未完成**。以下为作者自检，必要项自检通过不代表整体验收完成。"
-                    if report["reviewer"]["kind"] == "self" else "评审状态：已提供独立评审记录；身份标签本身不构成认证。"),
+             "", "记录检查：**" + report["status"] + "**。",
+             "", ("评审类型：作者自检；**独立评审未完成**。"
+                    if report["reviewer"]["kind"] == "self" else "评审类型：独立评审记录。"),
              "", "| 验收项 | 状态 | 判断依据 |", "| --- | --- | --- |"]
-    # 报告直接呈现实际逐项判断；不再计算或输出旧五维分数。
+    # 按验收项显示状态与判断依据。
     for item in report["criteria"]:
         cells = [str(item[key]).replace("|", "\\|").replace("\n", " ") for key in ("id", "status", "reason")]
         lines.append("| " + " | ".join(cells) + " |")
-    lines += ["", "必要失败项："] + (["- " + x for x in report["required_failures"]] or ["无。"])
-    lines += ["", "必要项证据缺口（不含上述独立评审状态）："] + (["- " + x for x in report["unverified"]] or ["当前记录未列出证据缺口。"])
-    lines += ["", "关键主张（分类与依据由评审者提供）："] + (
-        ["- " + x["id"] + "：" + x["kind"] + " / " + x["basis"] + "；" + x["text"] for x in report["claims"]] or ["旧格式没有主张核查。"])
+    lines += ["", "必要失败项："] + (["- " + x for x in report["required_failures"]] or ["没有。"])
+    lines += ["", "必要项证据缺口："] + (["- " + x for x in report["unverified"]] or ["没有。"])
+    lines += ["", "关键主张："] + (
+        ["- " + x["id"] + "：" + x["kind"] + " / " + x["basis"] + "；" + x["text"] for x in report["claims"]] or ["旧版输入：待补充主张记录。"])
     scope = report["scope"]
-    lines += ["", "操作范围核查：", scope["status"] + "；" + scope["reason"] if scope else "旧格式没有范围核查。"]
+    lines += ["", "操作范围核查：", scope["status"] + "；" + scope["reason"] if scope else "旧版输入：待补充范围核查。"]
     if scope:
         lines += ["- " + x["operation"] + "：" + x["target"] for x in scope["actions"]]
-    lines += ["", "下一动作："] + (["- " + x["id"] + ": " + x["action"] for x in report["next_actions"]] or ["当前记录未列出内容缺口；已知后续修改需核对受影响项。"])
+    lines += ["", "下一动作："] + (["- " + x["id"] + ": " + x["action"] for x in report["next_actions"]] or ["没有。"])
     lines += ["", "评审者：" + report["reviewer"]["id"], "", report["verification_scope"],
-              "", "证据及理由详见同目录work-eval-score.json；文件变化后重新核验。"]
+              "", "详细证据与判断依据见 work-eval-score.json。"]
     (path / "work-eval-score.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     return report
 
 
 def maintenance_scope(cwd: PathLike) -> bool:
-    """仅完整维护仓库开放门禁，独立技能安装不能把父目录当作项目。@author Pjh"""
+    """通过维护根标记、脚本真实路径和调用目录确定实验范围。@author Pjh"""
     source = PROJECT_ROOT / 'skills' / 'work-eval' / 'scripts' / 'work_eval.py'
     return ((PROJECT_ROOT / '.agent-workflow-root').is_file()
             and source.resolve() == Path(__file__).resolve()
@@ -353,10 +353,10 @@ def state_path(cwd: PathLike, session: str) -> Path:
 
 
 def hook(event: dict[str, Any]) -> dict[str, Any]:
-    """提示所有实质交付，Stop仅复核当前已登记任务并最多续跑一次。@author Pjh"""
+    """向已登记任务提供上下文，并在Stop检查当前记录。@author Pjh"""
     name = event.get("hook_event_name")
     session, turn, cwd = event.get("session_id"), event.get("turn_id"), event.get("cwd")
-    # 即使误接入其他宿主目录，也不注入提示、不创建状态、不影响其他会话。
+    # 维护项目外的事件直接返回空对象。
     if not isinstance(cwd, str) or not maintenance_scope(cwd):
         return {}
     if name == "UserPromptSubmit":
@@ -379,7 +379,7 @@ def hook(event: dict[str, Any]) -> dict[str, Any]:
     if state.get("session_id") != session or state.get("turn_id") != turn:
         return {}
     if state.get("release"):
-        return {"systemMessage": "工作验收：已记录未完成退出（" + state["release"]["kind"] + "）；不代表验收通过。"}
+        return {"systemMessage": "工作验收：未完成退出（" + state["release"]["kind"] + "）。"}
     problem = None
     try:
         report_path = Path(state["contract"]).parent / "work-eval-score.json"
@@ -394,15 +394,15 @@ def hook(event: dict[str, Any]) -> dict[str, Any]:
     if problem is None:
         return {}
     if event.get("stop_hook_active") or state.get("continuations", 0) >= 1:
-        return {"systemMessage": "AI工作评分未通过：" + problem + "。续跑次数已达到1；保留未完成状态，不能声称完成。"}
+        return {"systemMessage": "AI工作评分未通过：" + problem + "。续跑次数已达到1，任务保留未完成状态。"}
     state["continuations"] = 1
     write_json(path, state)
     return {"decision": "block", "reason": "AI工作评分门禁：" + problem + "。使用work-eval核对" + state["contract"]
-            + "。必要失败项仍可推进则修复并重评；真实外部阻碍、用户停止或硬预算达到时用release记录未完成原因。遵守已有权限，不自行扩大任务。"}
+            + "。必要失败项仍可推进则修复并重评；真实外部阻碍、用户停止或硬预算达到时用release记录未完成原因。"}
 
 
 def main() -> int:
-    """提供登记、评分、退出及原生hook入口，不执行输入里的命令。@author Pjh"""
+    """提供arm、score、release和hook命令入口。@author Pjh"""
     parser = argparse.ArgumentParser()
     sub = parser.add_subparsers(dest="action", required=True)
     arm = sub.add_parser("arm")
@@ -453,7 +453,7 @@ def main() -> int:
         return 1 if args.action == "score" and result["status"] != "pass" else 0
     except (OSError, ValueError, KeyError, TypeError) as exc:
         if args.action == "hook":
-            print(json.dumps({"systemMessage": "AI评分hook检查失败，未确认通过：" + type(exc).__name__}, ensure_ascii=False))
+            print(json.dumps({"systemMessage": "AI评分hook检查失败：" + type(exc).__name__}, ensure_ascii=False))
             return 0
         print(json.dumps({"error": type(exc).__name__, "detail": str(exc)}, ensure_ascii=False), file=sys.stderr)
         return 2

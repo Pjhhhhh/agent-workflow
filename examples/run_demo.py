@@ -1,4 +1,4 @@
-# @author Pjh：生成合成自检与正文来源失效示例，不冒充业务验收。
+# @author Pjh：生成合成自检与正文来源失效示例。
 
 import json
 import subprocess
@@ -23,7 +23,7 @@ def main():
         folder.mkdir()
         request, artifact = folder / 'request.txt', folder / 'artifact.txt'
         request.write_text('合成要求：写入演示文件。\n', encoding='utf-8')
-        artifact.write_text('这是合成演示文件，不是业务结果。\n', encoding='utf-8')
+        artifact.write_text('这是合成演示文件。\n', encoding='utf-8')
         cp, jp = folder / 'contract.json', folder / 'judgment.json'
         proof = [str(artifact)]
         action = {'operation': 'write', 'target': str(artifact)}
@@ -33,9 +33,9 @@ def main():
                   'criteria': [{'id': 'C1', 'description': '合成文件存在且内容符合示例', 'required': True}],
                   'artifacts': [str(request), str(artifact)]})
         save(jp, {'reviewer': {'kind': 'self', 'id': 'synthetic-example-not-a-reviewer'},
-                  'coverage': {'status': 'pass', 'reason': '仅为合成输入', 'missing_requirements': []},
+                  'coverage': {'status': 'pass', 'reason': '原要求对应本例演示文件', 'missing_requirements': []},
                   'criteria': [{'id': 'C1', 'status': 'pass', 'reason': '合成输入已生成', 'evidence': proof}],
-                  'integrity': {'status': 'pass', 'reason': '合成数据未声称真实业务通过', 'evidence': proof},
+                  'integrity': {'status': 'pass', 'reason': '合成输入与示例文件对应', 'evidence': proof},
                   'scope': {'status': 'pass', 'reason': '仅写示例文件', 'evidence': proof, 'actions': [action]},
                   'claims': [{'id': 'F1', 'text': '这是合成演示文件', 'kind': 'fact', 'basis': 'observed',
                               'required': True, 'reason': '读取示例正文',

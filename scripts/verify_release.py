@@ -1,4 +1,4 @@
-"""只读核对发布清单及 Markdown 文件引用，避免源码存在却漏入分发；不验证锚点或运行效果。@author Pjh"""
+# @author Pjh
 import argparse
 import json
 import re
@@ -8,13 +8,13 @@ from urllib.parse import unquote, urlsplit
 
 def main():
     """按实际根目录解析清单与链接，先拒绝越界再读取文件，输出可保存的检查结果。@author Pjh"""
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(description='核对发布清单文件及 Markdown 本地文件引用。')
     parser.add_argument('--root', required=True, type=Path, help='被检查的源码根目录')
     parser.add_argument('--manifest', required=True, type=Path, help='发布清单；相对路径按 root 解析')
     args = parser.parse_args()
     root = args.root.resolve()
     manifest = args.manifest if args.manifest.is_absolute() else root / args.manifest
-    report = {'scope': '清单文件存在及 Markdown 本地文件引用闭包；不检查锚点、远端安装或模型效果',
+    report = {'scope': '发布清单文件、根目录范围及 Markdown 本地文件引用',
               'root': str(root), 'manifest': str(manifest), 'release_entries': 0,
               'local_links_checked': 0, 'errors': []}
     errors = report['errors']

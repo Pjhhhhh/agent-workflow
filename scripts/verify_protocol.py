@@ -1,4 +1,4 @@
-"""用真实命令和hook输入回放评分边界，合成案例仅证明协议行为。@author Pjh"""
+# @author Pjh：用真实CLI和hook输入回放记录处理。
 
 import argparse
 import copy
@@ -44,10 +44,10 @@ def request_alias(c: dict, j: dict, artifact: Path, mode: str, channel: str = 'c
 
 
 class Replay:
-    """一轮回放持有脚本位置、产物目录与断言，导入时不启动回放。@author Pjh"""
+    """保存一轮回放的脚本位置、产物目录与断言。@author Pjh"""
 
     def __init__(self, script: Path, run: Path) -> None:
-        """接收参数解析后创建的本轮目录，不共享可变运行状态。@author Pjh"""
+        """接收本轮脚本路径与独立产物目录。@author Pjh"""
         self.script = script
         self.run = run
         self.results = []
@@ -71,11 +71,11 @@ class Replay:
         self.results.append({'case': label, 'pass': bool(condition)})
 
     def scenario(self, name: str, edit: FixtureEdit = None) -> tuple:
-        """每例单独的契约与工件，不覆盖前次回放。@author Pjh"""
+        """为每个案例创建独立输入与文件。@author Pjh"""
         folder = self.run / name
         folder.mkdir()
         artifact = folder / '实际工件.txt'
-        artifact.write_text('本例合成协议工件，不是业务验收。\n', encoding='utf-8')
+        artifact.write_text('本例合成协议工件。\n', encoding='utf-8')
         request = folder / '原始要求.txt'
         request.write_text('本例要求：写入合成协议工件并核验内容。\n', encoding='utf-8')
         contract = {'schema_version': 4, 'task_id': name, 'task_type': 'mixed', 'goal': '合成协议回放',
@@ -103,7 +103,7 @@ class Replay:
                 if item.get('status') in {'fail', 'unverified'}:
                     judgment['next_actions'].append({'id': item['id'], 'action': '修复本例对应工件后重验'})
             if judgment['coverage'].get('status') != 'pass' or judgment['coverage'].get('missing_requirements'):
-                judgment['next_actions'].append({'id': 'coverage', 'action': '核对原要求并修订契约后重评'})
+                judgment['next_actions'].append({'id': 'coverage', 'action': '核对原要求并修订任务要求文件后重评'})
         save(cp, contract)
         save(jp, judgment)
         return cp, jp, artifact
@@ -152,13 +152,12 @@ def run_score(replay: Replay) -> tuple:
     self_recovery = score_case('自检保留恢复动作', lambda c, j, a: (j['reviewer'].update(kind='self'), j['next_actions'].append({'id': 'protocol', 'action': '容量恢复后补独立评审'})), 1, 'provisional')
     check('不重复改写已有恢复动作', [x for x in self_recovery[3]['next_actions'] if x['id'] == 'protocol'] == [{'id': 'protocol', 'action': '容量恢复后补独立评审'}])
     check('独立通过没有自检提示', '独立评审未完成' not in (success[0].parent / 'work-eval-score.md').read_text(encoding='utf-8'))
-    record_change = score_case('同ID说明变化仅检查当前记录', lambda c, j, a: c.update(goal='修改后的目标'), 0, 'pass', set())
-    check('记录检查明确不保证字节一致', '不核验审阅前后字节一致' in record_change[3]['verification_scope'])
+    score_case('同ID说明变化仅检查当前记录', lambda c, j, a: c.update(goal='修改后的目标'), 0, 'pass', set())
     score_case('来源正文已变', lambda c, j, a: a.write_text('变化的版本', encoding='utf-8'), 1, 'partial', {'F1'})
     score_case('v3记录仍可读取', lambda c, j, a: c.update(schema_version=3), 0, 'pass')
 
     def missing(c: dict, j: dict, artifact: Path) -> None:
-        """声明缺失文件，不删除任何现有文件。@author Pjh"""
+        """声明尚未创建的文件，用于验证缺失状态。@author Pjh"""
         path = str(artifact.parent / '未生成工件.txt')
         c['artifacts'].append(path)
         save(artifact.parent / 'contract.json', c)
@@ -241,24 +240,24 @@ def run_score(replay: Replay) -> tuple:
         score_case('主张ID与动作冲突-' + identifier, lambda c, j, a, identifier=identifier: j['claims'][0].update(id=identifier), 2)
     score_case('验收ID与动作冲突', lambda c, j, a: (c['criteria'][0].update(id='scope'), j['criteria'][0].update(id='scope')), 2)
 
-    # 从真实CLI验证记录保护，不能让后来的任务覆盖先前验收证据。
+    # 用真实CLI验证不同输入和并发写入的报告隔离。
     cp2, jp2, art2 = scenario('报告目录隔离')
     rc, first = call('记录隔离-首次验收', ['score', cp2, jp2])
     report_file = cp2.parent / 'work-eval-score.json'
     original_report = report_file.read_bytes()
     alias_contract = cp2.parent / 'other-contract.json'
     alias_contract.write_bytes(cp2.read_bytes())
-    rc, _ = call('记录隔离-另一契约同目录', ['score', alias_contract, jp2])
-    check('不同契约拒绝覆盖原报告', rc == 2 and report_file.read_bytes() == original_report)
+    rc, _ = call('记录隔离-另一输入同目录', ['score', alias_contract, jp2])
+    check('不同输入拒绝覆盖原报告', rc == 2 and report_file.read_bytes() == original_report)
     lock = cp2.parent / '.work-eval-write.lock'
     lock.mkdir()
     rc, _ = call('记录隔离-忙目录', ['score', cp2, jp2])
     check('写锁阻止混写且不改原报告', rc == 2 and report_file.read_bytes() == original_report and lock.is_dir())
     # 本例自己创建的空锁已完成用途，只移除这个明确的空目录。
     lock.rmdir()
-    rc, _ = call('记录隔离-同契约顺序重验', ['score', cp2, jp2])
-    check('同契约顺序重验可用', rc == 0 and not lock.exists())
-    check('报告绑定精确契约路径', first.get('contract_path') == str(cp2.resolve()))
+    rc, _ = call('记录隔离-同一输入顺序重验', ['score', cp2, jp2])
+    check('同一输入顺序重验可用', rc == 0 and not lock.exists())
+    check('报告绑定精确输入路径', first.get('contract_path') == str(cp2.resolve()))
 
     return success
 
@@ -296,30 +295,30 @@ def run_hook(replay: Replay, success: Optional[tuple] = None) -> None:
     event['turn_id'] = 'turn-2'
     call('登记无评分', ['arm', no_score, '--session', event['session_id'], '--turn', event['turn_id'], '--cwd', cwd])
     check('缺评分首次续跑', call('无评分首次Stop', ['hook'], json.dumps(event))[1].get('decision') == 'block')
-    check('缺评分二次不死循环', 'decision' not in call('无评分二次Stop', ['hook'], json.dumps(event))[1])
+    check('缺评分二次停止续跑', 'decision' not in call('无评分二次Stop', ['hook'], json.dumps(event))[1])
     call('未完成退出', ['release', '--session', event['session_id'], '--turn', event['turn_id'], '--cwd', cwd,
                       '--reason', 'external_block', '--detail', '本例模拟环境缺失'])
     check('退出不伪称通过', '未完成退出' in call('退出Stop', ['hook'], json.dumps(event))[1].get('systemMessage', ''))
     rc, result = call('非对象hook', ['hook'], '[]')
-    check('非对象hook留警告', rc == 0 and '未确认通过' in result.get('systemMessage', ''))
+    check('非对象hook返回错误', rc == 0 and 'ValueError' in result.get('systemMessage', '') and 'decision' not in result)
     rc, result = call('坏JSONhook', ['hook'], '{')
-    check('坏JSONhook留警告', rc == 0 and '未确认通过' in result.get('systemMessage', ''))
+    check('坏JSONhook返回错误', rc == 0 and 'JSONDecodeError' in result.get('systemMessage', '') and 'decision' not in result)
     prompt = dict(event, hook_event_name='UserPromptSubmit')
     check('退出后Prompt不注入', call('退出后Prompt', ['hook'], json.dumps(prompt))[1] == {})
     call('恢复实验登记', ['arm', no_score, '--session', event['session_id'], '--turn', event['turn_id'], '--cwd', cwd])
     check('Prompt注入真实轮次', 'turn-2' in call('Prompt触发', ['hook'], json.dumps(prompt))[1]['hookSpecificOutput']['additionalContext'])
     check('新轮无重登记不注入', call('新轮Prompt', ['hook'], json.dumps(dict(prompt, turn_id='turn-3')))[1] == {})
-    foreign = dict(event, cwd=str(Path('/tmp')), hook_event_name='UserPromptSubmit')
+    foreign = dict(event, cwd=str(PROJECT.parent / 'agent-workflow-external-check'), hook_event_name='UserPromptSubmit')
     check('项目外Prompt无注入', call('项目外Prompt', ['hook'], json.dumps(foreign))[1] == {})
     foreign['hook_event_name'] = 'Stop'
     check('项目外Stop无拦截', call('项目外Stop', ['hook'], json.dumps(foreign))[1] == {})
 
-    # 用历史反馈里的三个缺口验证闭环；这些状态都是合成输入，不运行真实业务。
+    # 用历史反馈中的三个缺口构造连续恢复案例。
     cp, jp, artifact = scenario('历史早停闭环')
     c, j = json.loads(cp.read_text(encoding='utf-8')), json.loads(jp.read_text(encoding='utf-8'))
     request = Path(c['request_artifact'])
     request.write_text('本例要求：写入合成协议工件并核验内容。\n'
-                       'R006、视觉第2页、视觉第3页是三个必要项，全部通过才完成；不执行真实业务。\n', encoding='utf-8')
+                       'R006、视觉第2页、视觉第3页是三个必要项，全部通过才完成。\n', encoding='utf-8')
     c['criteria'] = [{'id': identifier, 'description': description, 'required': True} for identifier, description in
                      [('R006', '合成R006终态'), ('V002', '合成视觉第2页终态')]]
     j['criteria'] = [{'id': item['id'], 'status': 'unverified', 'reason': '合成未识别状态，仍需回修',
@@ -363,13 +362,13 @@ def run_hook(replay: Replay, success: Optional[tuple] = None) -> None:
     call('早停-登记第一轮', ['arm', cp, '--session', loop['session_id'], '--turn', loop['turn_id'], '--cwd', loop_cwd])
     check('早停-未完成请求继续', call('早停-首次Stop', ['hook'], json.dumps(loop))[1].get('decision') == 'block')
     warning = call('早停-第二次Stop', ['hook'], json.dumps(loop))[1]
-    check('早停-续跑上限不等于完成', 'decision' not in warning and '不能声称完成' in warning.get('systemMessage', ''))
+    check('早停-续跑耗尽保留未完成', 'decision' not in warning and '未完成状态' in warning.get('systemMessage', ''))
     loop['turn_id'] = 'after-resume'
     check('早停-新轮不猜旧任务', call('早停-新轮未登记Stop', ['hook'], json.dumps(loop))[1] == {})
     call('早停-明确恢复原任务', ['arm', cp, '--session', loop['session_id'], '--turn', loop['turn_id'], '--cwd', loop_cwd])
     state = json.loads((loop_cwd / '.codex/work-eval/closed-loop/active.json').read_text(encoding='utf-8'))
     save(cp.parent / '恢复登记快照.json', state)
-    check('早停-恢复关联同契约', state['contract'] == str(cp.resolve())
+    check('早停-恢复关联同一输入', state['contract'] == str(cp.resolve())
           and state['turn_id'] == 'after-resume' and state['continuations'] == 0)
     check('早停-恢复后旧缺口仍拦', call('早停-恢复Stop', ['hook'], json.dumps(loop))[1].get('decision') == 'block')
 
@@ -389,10 +388,10 @@ def run_hook(replay: Replay, success: Optional[tuple] = None) -> None:
           and 'R006' not in {x['id'] for x in partial_report['next_actions']}
           and not any(entry.startswith('R006:') for entry in partial_report['unverified']))
 
-    artifact.write_text(artifact_initial + '模拟回修：R006、V002、V003均为pass；不代表真实业务已修复。\n', encoding='utf-8')
+    artifact.write_text(artifact_initial + '模拟回修：R006、V002、V003均为pass。\n', encoding='utf-8')
     (cp.parent / '工件-全部回修.txt').write_bytes(artifact.read_bytes())
     for item in j['criteria']:
-        item.update(status='pass', reason='合成终态已核验，不代表真实业务')
+        item.update(status='pass', reason='合成终态已核验')
     j['next_actions'] = []
     final_judgment = cp.parent / 'judgment-全部回修.json'
     save(final_judgment, j)
@@ -409,7 +408,7 @@ def run_installed(replay: Replay) -> None:
     call, check = replay.call, replay.check
     scenario = replay.scenario
 
-    # 模拟安装器只复制一个技能，不能借安装父目录开启维护门禁。
+    # 独立安装副本按技能目录复制，维护范围按真实根标记验证。
     installed = run / 'installed' / 'work-eval'
     shutil.copytree(replay.script.parent.parent, installed)
     installed_script = installed / 'scripts/work_eval.py'
@@ -447,10 +446,10 @@ def main(argv: Optional[list[str]] = None) -> int:
     if args.suite in {'all', 'installed'}:
         run_installed(replay)
     scopes = {
-        'all': '真实CLI与hook记录检查；不核验字节漂移，合成案例不是业务或模型效果验收',
-        'score': '真实score记录检查与报告目录隔离；合成案例不是业务或模型效果验收',
-        'hook': '真实局部hook与必要score前置检查；合成连续链不是业务或宿主续跑验收',
-        'installed': '任务目录内独立技能副本的score、门禁拒绝与引用检查；不是宿主安装验收',
+        'all': '合成输入的真实CLI回放：记录处理、局部hook和独立技能副本',
+        'score': '合成输入的真实score记录处理与报告目录隔离',
+        'hook': '合成输入的真实局部hook、score前置和连续恢复链回放',
+        'installed': '任务目录内独立技能副本的score、维护范围和本地引用检查',
     }
     summary = {'scope': scopes[args.suite], 'suite': args.suite,
                'pass': all(x['pass'] for x in replay.results), 'cases': replay.results}
