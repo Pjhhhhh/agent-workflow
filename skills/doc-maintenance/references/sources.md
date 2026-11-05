@@ -1,10 +1,10 @@
 <!-- @author Pjh -->
 # 来源与采用理由
 
-这些资料用于说明技能的编辑取舍。项目事实仍以本次目标的有效要求、实现和实际证据核对。
+这些资料用于说明技能的编辑取舍。
 
 - [Da1sypetals：AGENTS.md](https://github.com/Da1sypetals/AGENTS.md/blob/a475456fe0f99ad40a9f974c5f918d2d4f482546/AGENTS.md)：本技能采用其中的语言要求，使用常用中文、完整词语和动宾结构，保留标识符原名，直接描述当前对象与结果；修改经过留在任务材料中。
-- [lennney：STSS](https://github.com/lennney/stop-that-shit/blob/c8d0771f6bfe1cbfa8120fe0c0e9b23540d6a3bd/skills/stss/SKILL.md) 与 [STS](https://github.com/lennney/stop-that-shit/blob/c8d0771f6bfe1cbfa8120fe0c0e9b23540d6a3bd/skills/stop-that-shit/SKILL.md)：STSS 用读者用途逐句判断内容，STS 要求完整履行当前责任并保留必要保障。本技能据此处理自然段中的无用途补充，保留会改变理解、操作或判断的事实、条件、权限和失败处置，并在删改后核对原目标。
+- [lennney：STSS](https://github.com/lennney/stop-that-shit/blob/c8d0771f6bfe1cbfa8120fe0c0e9b23540d6a3bd/skills/stss/SKILL.md) 与 [STS](https://github.com/lennney/stop-that-shit/blob/c8d0771f6bfe1cbfa8120fe0c0e9b23540d6a3bd/skills/stop-that-shit/SKILL.md)：STSS 用读者用途逐句判断内容，STS 要求完整履行当前责任并保留必要保障。本技能据此结合章节用途判断内容取舍，保留会改变理解、操作或判断的事实、条件、权限和失败处置，并在删改后核对原目标。
 - [Microsoft：写作风格的十项建议](https://learn.microsoft.com/style-guide/top-10-tips-style-voice)：从读者需要完成的事情组织内容，采用直接表达。本技能据此让用途、行为和操作先于实现细节。
 - [Google Technical Writing：受众](https://developers.google.com/tech-writing/one/audience)：根据读者已有知识与完成任务所需知识之间的差距决定解释内容。本技能据此区分概览中的作用说明和字段参考中的精确名称。
 - [Google Developer Documentation Style Guide：提示与告警](https://developers.google.com/style/notices)：提示应服务当前操作，连续提示可能需要重组正文。本技能据此将告警放到受影响的操作旁，合并重复提醒，并保留真实后果和前置条件。

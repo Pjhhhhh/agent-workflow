@@ -28,7 +28,7 @@ npx skills add Pjhhhhh/agent-workflow --skill doc-maintenance
 
 ## 文档任务
 
-文档任务使用 `doc-maintenance`，并按宿主或项目规则读取用户已配置的文档规范；规范不随技能安装。局部编写与处理核对目标内容，集中整理再检查跨页阅读路径。
+文档任务使用 `doc-maintenance`，并按宿主或项目规则读取用户已配置的文档规范。局部编写与处理核对目标内容，集中整理再检查跨页阅读路径。
 
 ## 按问题查阅
 
@@ -37,8 +37,7 @@ npx skills add Pjhhhhh/agent-workflow --skill doc-maintenance
 | 安装、更新、确认生效或退出 | [安装与更新](docs/安装与更新.md) |
 | 了解任务执行、验证与恢复 | [工作流程](docs/工作流程.md) |
 | 查项目说明、工具、验证与研究材料 | [文档导航](docs/README.md) |
-|                  |                        |
 
 ## 许可
 
-项目自有内容采用[MIT许可](LICENSE)。图集的第三方和内嵌字体声明见[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。私人计划、业务材料、会话、配置和浏览器日志不随仓库提交。
+项目自有内容采用[MIT许可](LICENSE)。图集的第三方和内嵌字体声明见[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。

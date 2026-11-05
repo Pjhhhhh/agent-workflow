@@ -23,8 +23,6 @@
 
 规格、任务与验收证据的关联按[共享接入规则](../../skills/work-eval/references/matt-pocock.md#规格任务与验收证据)执行，沿用上述 `.plan/` 记录。
 
-Git 写入、安装和外部发布按当前授权执行。
-
 ## Wayfinder 探索任务
 
 `/wayfinder` 使用一份探索地图和每项一个的子任务文件：
