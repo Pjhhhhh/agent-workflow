@@ -101,4 +101,4 @@ PATH 中已有可用的 `ocr` 时，可以直接使用以下命令；使用官�
 2. 自行修复：问题确认且当前任务与授权覆盖时，以最小修改完成修复。遇到真实业务取舍、超出范围或权限缺口时，询问所需决定或授权，同时继续独立工作。
 3. 复验并更新状态：按风险验证受影响用户路径或运行适当测试，再复审受影响文件。证据支持修复时标为已解决；未解决或无法复现时，保留具体状态和依据。后续 Git 提交、发送或发布按当前授权执行。
 
-委派用法依据：上游 [v1.12.12 委派说明](https://github.com/alibaba/open-code-review/blob/182898cf522da3d04157b422752d028417974e19/pages/src/content/docs/zh/integrations/delegate.md)与[规则说明](https://github.com/alibaba/open-code-review/blob/182898cf522da3d04157b422752d028417974e19/pages/src/content/docs/zh/review-rules.md)；全文件模式依据[官方 README](https://github.com/alibaba/open-code-review#what-is-open-code-review)与当前 `ocr scan --help`。升级后核对当前 CLI 帮助、规则、输出及受影响行为。
+委派参数与规则见[委派说明](https://github.com/alibaba/open-code-review/blob/182898cf522da3d04157b422752d028417974e19/pages/src/content/docs/zh/integrations/delegate.md)和[规则说明](https://github.com/alibaba/open-code-review/blob/182898cf522da3d04157b422752d028417974e19/pages/src/content/docs/zh/review-rules.md)，全文件模式参数以当前 `ocr scan --help` 为准。升级后核对当前 CLI 帮助、规则、输出及受影响行为。

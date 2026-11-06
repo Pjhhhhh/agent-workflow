@@ -196,7 +196,7 @@ def run_score(replay: Replay) -> tuple:
     score_case('真实性未验证保留动作', lambda c, j, a: (j['integrity'].update(status='unverified'),
                j['next_actions'].append({'id': 'integrity', 'action': '补取实际真实性核查证据'})), 1, 'partial', {'integrity'})
 
-    # 先冻结这些黑盒失败输入，再修改验收器，避免只检查实现自己选择的成功路径。
+    # 黑盒失败输入覆盖证据冒用、真实性缺口及主张依据不成立的情形。
     score_case('原要求冒充完成证据', lambda c, j, a: j['criteria'][0].update(evidence=[c['request_artifact']]), 1, 'partial', {'C1'})
     score_case('真实性通过无核查证据', lambda c, j, a: j['integrity'].update(evidence=[]), 1, 'partial', {'integrity'})
     score_case('推断冒充事实', lambda c, j, a: j['claims'][0].update(basis='inferred'), 1, 'fail')
@@ -262,7 +262,7 @@ def run_score(replay: Replay) -> tuple:
     return success
 
 def run_hook(replay: Replay, success: Optional[tuple] = None) -> None:
-    """沿原顺序回放门禁隔离与历史早停连续链，单独运行仅建立必要成功前置。@author Pjh"""
+    """回放门禁隔离与未完成项恢复链，单独运行仅建立必要成功前置。@author Pjh"""
     run = replay.run
     call, check = replay.call, replay.check
     scenario = replay.scenario
@@ -313,7 +313,7 @@ def run_hook(replay: Replay, success: Optional[tuple] = None) -> None:
     foreign['hook_event_name'] = 'Stop'
     check('项目外Stop无拦截', call('项目外Stop', ['hook'], json.dumps(foreign))[1] == {})
 
-    # 用历史反馈中的三个缺口构造连续恢复案例。
+    # 连续恢复案例覆盖未识别项、漏列必要项与逐项回修。
     cp, jp, artifact = scenario('历史早停闭环')
     c, j = json.loads(cp.read_text(encoding='utf-8')), json.loads(jp.read_text(encoding='utf-8'))
     request = Path(c['request_artifact'])
@@ -431,7 +431,7 @@ def run_installed(replay: Replay) -> None:
 
 
 def main(argv: Optional[list[str]] = None) -> int:
-    """解析选择后创建本轮上下文，默认完整保留全部既有回放。@author Pjh"""
+    """按所选分组创建运行上下文，默认执行全部回放。@author Pjh"""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--suite', choices=['all', 'score', 'hook', 'installed'], default='all',
                         help='选择回放分组；默认 all 执行全部既有案例')
