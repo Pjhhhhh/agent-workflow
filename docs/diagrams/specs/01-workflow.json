@@ -2,10 +2,10 @@
   "schema_version": 2,
   "diagram_type": "workflow",
   "meta": {
-    "title": "通用工作流程 · 2026-10-14 历史示意",
+    "title": "任务执行与验收",
     "locale": "zh-CN",
     "quality_profile": "showcase",
-    "subtitle": "本页保留当时的流程快照。当前执行要求见仓库 skills/work-eval/SKILL.md；图集入口 index.html 提供链接。",
+    "subtitle": "按任务选择工程方法与验证能力，依据实际结果完成验收。",
     "output": "docs/diagrams/01-workflow.html"
   },
   "lanes": [
@@ -67,7 +67,7 @@
       "type": "backend",
       "label": "按任务复核",
       "width": 150,
-      "sublabel": "简单自检 · 复杂独立评审"
+      "sublabel": "按要求与实际风险"
     },
     {
       "id": "n5",
@@ -147,7 +147,7 @@
       "title": "配置默认入口后",
       "items": [
         "全局规则要求目标、执行、证据和回修。",
-        "纯问答直接回答；复杂或关键冲突安排独立评审。"
+        "纯问答直接回答；独立复核按明确要求或实际风险安排。"
       ]
     },
     {

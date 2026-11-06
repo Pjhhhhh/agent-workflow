@@ -2,10 +2,10 @@
   "schema_version": 2,
   "diagram_type": "workflow",
   "meta": {
-    "title": "通用复杂任务 · 2026-10-14 历史示意",
+    "title": "记录检查 CLI",
     "locale": "zh-CN",
     "quality_profile": "showcase",
-    "subtitle": "本页保留当时的流程快照。当前执行要求见仓库 skills/work-eval/SKILL.md；图集入口 index.html 提供链接。",
+    "subtitle": "显式选择记录检查 CLI 时，按实际输入、工件和评审证据判定结果。",
     "output": "docs/diagrams/05-local-evaluation.html"
   },
   "lanes": [
@@ -59,7 +59,7 @@
       "lane": "main",
       "col": 3,
       "type": "backend",
-      "label": "独立复核",
+      "label": "自检或独立评审",
       "width": 150,
       "sublabel": "覆盖、主张与范围"
     },
@@ -70,7 +70,7 @@
       "type": "backend",
       "label": "脚本校验",
       "width": 150,
-      "sublabel": "版本、引用与操作"
+      "sublabel": "字段、引文与范围"
     },
     {
       "id": "n5",
@@ -151,7 +151,7 @@
       "title": "按必要结果逐项验收",
       "items": [
         "评审查遗漏、来源及范围；父代理保存原判断。",
-        "计划服从目标项目约定；证据归启动目录并按批次隔离。"
+        "计划服从目标项目约定；证据归启动目录并按运行目录隔离。"
       ]
     },
     {

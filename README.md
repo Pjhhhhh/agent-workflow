@@ -47,8 +47,8 @@ npx skills add Pjhhhhh/skills --skill doc-maintenance
 | 选择工程方法、验证实际结果或恢复任务 | [工作流程](docs/工作流程.md) |
 | 查 Matt Pocock 工程技能的选择条件 | [Matt Pocock 接入规则](skills/work-eval/references/matt-pocock.md) |
 | 查应用验证、性能测量和变更影响的方法 | [pstack 验证与改进方法](skills/work-eval/references/pstack.md) |
-| 查项目说明、工具、验证与研究材料 | [文档导航](docs/README.md) |
+| 查方法依据、适用条件与验证结果 | [文档导航](docs/README.md) |
 
 ## 许可
 
-项目自有内容采用[MIT许可](LICENSE)。第三方来源、许可及内嵌字体声明见[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
+项目自有内容采用[MIT许可](LICENSE)。
