@@ -25,7 +25,7 @@ python3 /实际技能目录/scripts/work_eval.py score 任务要求文件 评审
 
 ## 维护项目内的 Stop 实验
 
-`arm`、`release`、`hook` 用于已获授权的局部实验，须在含 `.agent-workflow-root` 和标准源码目录的完整维护仓库内调用。
+`arm`、`release`、`hook` 用于已获授权的局部实验，须在含 `.skills-root` 和标准源码目录的完整维护仓库内调用。
 
 ### 登记本轮任务
 
@@ -63,7 +63,7 @@ Stop 重新检查当前记录并比较报告。存在必要缺口且本轮尚未
 python3 scripts/verify_protocol.py
 ```
 
-核对本次报告的 `cases`、`pass` 和实际命令结果。输入、命令、退出码和输出保存在 `.codex/verification/协议回放-时间/`，操作说明见[维护说明](https://github.com/Pjhhhhh/agent-workflow/blob/main/docs/维护说明.md#重放协议)。
+核对本次报告的 `cases`、`pass` 和实际命令结果。输入、命令、退出码和输出保存在 `.codex/verification/协议回放-时间/`，操作说明见[维护说明](https://github.com/Pjhhhhh/skills/blob/main/docs/维护说明.md#重放协议)。
 
 ## 恢复同一任务
 
@@ -75,4 +75,4 @@ python3 scripts/verify_protocol.py
 
 ## 按失败维护入口
 
-更新命令、字段和前置条件时，按[维护说明](https://github.com/Pjhhhhh/agent-workflow/blob/main/docs/维护说明.md#按失败维护入口)核验受影响行为并更新本页。
+更新命令、字段和前置条件时，按[维护说明](https://github.com/Pjhhhhh/skills/blob/main/docs/维护说明.md#按失败维护入口)核验受影响行为并更新本页。

@@ -308,7 +308,7 @@ def run_hook(replay: Replay, success: Optional[tuple] = None) -> None:
     call('恢复实验登记', ['arm', no_score, '--session', event['session_id'], '--turn', event['turn_id'], '--cwd', cwd])
     check('Prompt注入真实轮次', 'turn-2' in call('Prompt触发', ['hook'], json.dumps(prompt))[1]['hookSpecificOutput']['additionalContext'])
     check('新轮无重登记不注入', call('新轮Prompt', ['hook'], json.dumps(dict(prompt, turn_id='turn-3')))[1] == {})
-    foreign = dict(event, cwd=str(PROJECT.parent / 'agent-workflow-external-check'), hook_event_name='UserPromptSubmit')
+    foreign = dict(event, cwd=str(PROJECT.parent / 'skills-external-check'), hook_event_name='UserPromptSubmit')
     check('项目外Prompt无注入', call('项目外Prompt', ['hook'], json.dumps(foreign))[1] == {})
     foreign['hook_event_name'] = 'Stop'
     check('项目外Stop无拦截', call('项目外Stop', ['hook'], json.dumps(foreign))[1] == {})

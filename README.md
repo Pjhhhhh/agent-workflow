@@ -1,7 +1,7 @@
 <!-- @author Pjh -->
-# agent-workflow
+# skills
 
-按任务选择两个独立技能，让 AI 代理完成工作并核对实际结果。
+面向实际工作的 AI Agent 技能集：按需组合技能，完成工程与文档任务，用实际结果检验交付。
 
 | 技能 | 用途 |
 | --- | --- |
@@ -15,13 +15,13 @@
 安装工作流：
 
 ```sh
-npx skills add Pjhhhhh/agent-workflow --skill work-eval
+npx skills add Pjhhhhh/skills --skill work-eval
 ```
 
 安装文档编写与处理技能：
 
 ```sh
-npx skills add Pjhhhhh/agent-workflow --skill doc-maintenance
+npx skills add Pjhhhhh/skills --skill doc-maintenance
 ```
 
 安装后在宿主中调用对应技能。完整目录复制、源码链接和安装确认见[安装与更新](docs/安装与更新.md)；文档任务的具体入口见[安装 doc-maintenance](docs/安装与更新.md#安装-doc-maintenance)。

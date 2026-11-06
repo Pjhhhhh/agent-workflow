@@ -333,7 +333,7 @@ def save_score(contract: PathLike, judgment: PathLike) -> dict[str, Any]:
 def maintenance_scope(cwd: PathLike) -> bool:
     """通过维护根标记、脚本真实路径和调用目录确定实验范围。@author Pjh"""
     source = PROJECT_ROOT / 'skills' / 'work-eval' / 'scripts' / 'work_eval.py'
-    return ((PROJECT_ROOT / '.agent-workflow-root').is_file()
+    return ((PROJECT_ROOT / '.skills-root').is_file()
             and source.resolve() == Path(__file__).resolve()
             and Path(cwd).resolve().is_relative_to(PROJECT_ROOT))
 
@@ -344,7 +344,7 @@ def state_path(cwd: PathLike, session: str) -> Path:
         raise ValueError("session id无效")
     cwd = Path(cwd).resolve()
     if not maintenance_scope(cwd):
-        raise ValueError("登记与状态仅允许在agent-workflow项目内")
+        raise ValueError("登记与状态仅允许在skills项目内")
     # 状态与任务记录统一保存在启动目录的.codex内，写入失败由调用方明确报告。
     path = cwd / ".codex" / "work-eval" / session / "active.json"
     if not path.resolve().is_relative_to(cwd):
