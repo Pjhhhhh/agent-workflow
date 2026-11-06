@@ -12,14 +12,16 @@
 | 调用技能或设置按任务读取入口 | [调用技能](安装与更新.md#调用技能) · [按任务默认使用](安装与更新.md#按任务默认使用) |
 | 确认技能在实际任务中生效 | [安装后的最小验收](安装与更新.md#安装后的最小验收) |
 | 了解任务执行、核验与恢复 | [工作流程](工作流程.md) |
+| 为诊断、任务安排、实施或代码审查选择工程方法 | [Matt Pocock 接入规则](../skills/work-eval/references/matt-pocock.md) |
+| 验证实际应用、核对性能或调查变更影响 | [pstack 验证与改进方法](../skills/work-eval/references/pstack.md) |
 | 选择文档任务的处理方式 | [文档任务怎样处理](工作流程.md#文档任务怎样处理) |
 | 理解全局规则、用户级规范、技能与业务工作区 | [全局使用范围](全局使用范围.md) |
 | 核对来源、权限、文件保护与回修 | [执行、核验与恢复](../skills/work-eval/references/execution-and-recovery.md) |
 | 更新或退出使用 | [更新技能](安装与更新.md#更新技能) · [退出使用](安装与更新.md#退出使用) |
 
-## 可选技能、插件与工具
+## 其他技能、插件与工具
 
-需要工程诊断、审查、绘图或代码关系等能力时，查[可选接入说明](../skills/work-eval/references/optional-integrations.md)。
+需要系统理解、发布产物取证、OCR 审查或绘图等能力时，查[可选接入说明](../skills/work-eval/references/optional-integrations.md)。
 
 ## 验证与维护
 
@@ -40,4 +42,5 @@
 | --- | --- |
 | [依据与适用范围](依据与适用范围.md) | 方法与研究来源、适用范围 |
 | [流程参考与取舍](流程参考与取舍.md) | Matt Pocock、pstack、HumanLayer 等来源的采用理由与历史选择 |
+| 研究原稿 | 维护者本地的 `docs/research/` 按日期保留工具比较、采用建议与当时验证结果 |
 | [流程图集](diagrams/index.html) | 历史流程和局部实验示意 |

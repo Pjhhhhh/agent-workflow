@@ -1,6 +1,8 @@
 <!-- @author Pjh -->
 # 可运行的协议示例
 
+本示例演示记录检查 CLI 如何处理作者自检与失效引文。日常任务的执行与验收按[工作流程](../docs/工作流程.md)选择。
+
 在完整仓库根目录执行 `python3 examples/run_demo.py`。程序使用 Python 标准库，在启动目录的 `.codex/verification/demo-时间/` 下保存每次运行结果。
 
 示例依次生成两个独立运行目录：
