@@ -19,4 +19,4 @@
 
 - 任务分诊：使用 [五个默认标签](docs/agents/triage-labels.md)。
 - 领域探索或架构决策：先读 [领域文档约定](docs/agents/domain.md)，采用根 `GLOSSARY.md` 与 `docs/adr/`。
-- 文档任务：读取宿主规则指定的文档规范，并使用[文档编写与维护技能](skills/doc-maintenance/SKILL.md)。
+- 文档任务：使用宿主规则指定的文档入口；宿主未提供入口时，使用[文档编写与维护技能](skills/doc-maintenance/SKILL.md)。
